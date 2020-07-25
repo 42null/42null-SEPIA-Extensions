@@ -42,9 +42,9 @@ import java.math.*;
  * Demo for a restaurant reservation service.
  * 
  * @author Florian Quirin (RestrauntDemo - this file's template)
- * @author 42Null		  (BasicMath - this file)
+ * @author 42null		  (BasicMath - this file)
  * 
- * @version #0.02.01
+ * @version #0.02.02
  * 
  */
 public class BasicMath implements ServiceInterface {
@@ -54,6 +54,7 @@ public class BasicMath implements ServiceInterface {
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false;
+private static final String[] wakeWords = {"whatis","caulacate"};
 // -----------------------------------------------------------------------
 
 	//Define some sentences for testing:
@@ -127,7 +128,12 @@ private static final boolean makePublic = false;
 					+ "(whatis|caulacate)\\b.* (+|-|/|^)"
 				+ ")\\b.*", EN);*/
 
-				info.setCustomTriggerRegX("whatis|caulacate",EN);
+		String tempString = "";
+		for(int i = 0; i < wakeWords.length; i++){
+			tempString += wakeWords[i]+"|";
+		}
+		tempString = tempString.substring(0,tempString.length()-2);
+		info.setCustomTriggerRegX(tempString,EN);
 
 		info.setCustomTriggerRegXscoreBoost(5);		//boost service a bit to increase priority over similar ones
 		
@@ -186,16 +192,16 @@ private static final boolean makePublic = false;
 
 		if((firstNumber).contains("--{:Help Page:}--")){
 			api.addAction(ACTIONS.BUTTON_IN_APP_BROWSER);
-			api.putActionInfo("url", "https://github.com/SEPIA-Framework/replacewithnewlinkongithubwhenavaiable");
+			api.putActionInfo("url", "https://github.com/42null/42null-SEPIA-Extensions");
 			api.putActionInfo("title", "Source code");
 			
 			//... and we also add a demo card
 			Card card = new Card(Card.TYPE_SINGLE);
 			JSONObject linkCard = card.addElement(
 					ElementType.link, 
-					JSON.make("title", "Simple Math Documentation" + ":", "desc", "By 42Null"),
+					JSON.make("title", "Basic Math Documentation" + ":", "desc", "By 42null"),
 					null, null, "", 
-					"https://replacewithnewlinkongithubwhenavaiable/", 
+					"https://github.com/42null/42null-SEPIA-Extensions/blob/master/README.md", 
 					"https://sepia-framework.github.io/img/icon.png", 
 					null, null
 			);
@@ -424,7 +430,7 @@ private static final boolean makePublic = false;
 
 // Remove .0 artificat from caulactedNumber
 			String caulactedNumberStr = caulactedNumber+"";
-			if((caulactedNumber.doubleValue() % 1) == 0){
+			if((caulactedNumber.doubleValue() % 1) == 0 && !(caulactedNumberStr.contains("E+"))){
 				caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("."));
 			}
 
@@ -703,6 +709,7 @@ private static final boolean makePublic = false;
 			input_ = input_.replaceAll("of", "");
 			input_ = input_.replaceAll("by", "");
 			input_ = input_.replaceAll("the", "");
+			input_ = input_.replaceAll("and", "");
 			input_ = input_.replaceAll("itive", ""); //(For negitive)
 			input_ = input_.replaceAll("er", ""); //(For power)
 
