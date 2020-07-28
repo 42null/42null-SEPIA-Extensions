@@ -44,7 +44,7 @@ import java.math.*;
  * @author Florian Quirin (RestrauntDemo - this file's template)
  * @author 42null		  (BasicMath - this file)
  * 
- * @version #0.02.02
+ * @version #0.02.03.2
  * 
  */
 public class BasicMath implements ServiceInterface {
@@ -247,7 +247,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			boolean dontReturn = false;
 			String extracted = removeUnwanted(input+" ");// ' ' required to add ending seperation
 			if(extracted.equals("")){
-				// if(true){
 				return "";
 			}else if(extracted.equals("--help")){
 				pageToReturn = 1;
@@ -274,9 +273,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				boolean canAdd = false;
 				BigDecimal intermideate_;
 				Boolean whileRan_ = false;
-				extracted = "(("+extracted+")"+dontUseMeStr;
+				extracted = "(0+("+extracted+")"+dontUseMeStr;
 				extracted = extracted.replaceAll(" ","");
-				// if(true){return extracted;}
 // ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator, 2 = wrapper ( '(' or ')' )
 				boolean notANumber = true;
 
@@ -288,25 +286,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					// }
 					if(isCharNumber(currentChar_) || currentChar_ == '.' || currentChar_ == '−'){
 						notANumber = false;
-						// UNESSERY - spaceless, should have done it sooner
-						/*while(extracted.charAt(i+1) == ' ' && isCharNumber(extracted.charAt(i+2)) && i < (extracted.length() - 1)){
-							// extracted = (extracted.substring(0,i)) + (extracted.substring(i+1,(extracted.length())-1));
-							// extracted = (extracted.substring(0,i+1)) + (extracted.substring(i+2,(extracted.length())-1));
-							extracted = (extracted.substring(0,i+1)) + (extracted.substring(i+2,(extracted.length())-1));
-							// if(true){return "_"+extracted+"_";}
-							// currentChar_ = extracted.charAt(i);
-							// return "_"+currentChar_+"_";
-							currentItem_ += currentChar_;
-							// if(true){ return "extracted = _"+extracted+"_ i = "+i+" currentChar_ = "+currentChar_; }
-							
-							i++;
-							counter++;
-							currentChar_ = extracted.charAt(i);
 
-							whileRan_ = true;
-							// return "extracted = _"+extracted+ "i = "+i+" _"+((extracted.charAt(i+1)) == ' ' && isCharNumber(extracted.charAt(i+2)));
-						}*/
-						
 						if(currentChar_ == '−'){
 							currentChar_ = '-';
 						}else{
@@ -318,9 +298,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 						}else{
 							whileRan_ = false;
 						}
-
-						whileRan_ = false;
-
+						
 
 						if(!(isCharNumber(extracted.charAt(i+1)) || (extracted.charAt(i+1)) == '.')){
 							intermideate_ = new BigDecimal(Double.parseDouble(currentItem_)+"");
@@ -345,13 +323,23 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 						itemArrayMeta.add(7); //Operator (
 					}else if(currentChar_ == ')'){
 						itemArrayMeta.add(8); //Operator )
-					}else if(currentChar_ == '!'){
+					}else if(("j"+currentChar_).equals("j!") || currentChar_ == 'f'){
 						itemArrayMeta.add(9); //Operator ! (factorial)
 					}else if(currentChar_ == 'π'){	//Sepcial number case - pi
 						notANumber = false;
 						itemArrayMeta.add(1); //Number
 						numberArray.add(new BigDecimal(Double.parseDouble("3.14159265358979323846")));
 						currentItem_ = "";
+					}else if(currentChar_ == '_'){ //Special case - out of order powers
+						notANumber = false;
+						
+						itemArrayMeta.add(1); //Number
+						numberArray.add(new BigDecimal(Double.parseDouble(currentItem_.substring(0,currentItem_.length()-2))+""));
+						extracted = extracted.replaceFirst("^","");
+						extracted = extracted.replaceFirst("_","^");
+						// extracted = extracted.substring(0,i)+"^"+extracted.charAt(i+1)+extracted.substring(0,i);
+						currentItem_ = "";
+						// return extracted;
 					}
 
 					if(notANumber){
@@ -386,12 +374,13 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					// MathContext mc_ = new MathContext(18);//longestValueLength(numberArray)-1);
 
 					addInMultiplication();
-					// fixOutOfPlacePowers(); //TODO: Fix
+					// fixOutOfPlacePowers(); //Fixed and no longer uses this module, it will likley be removed in a future version
 					removeSingularSections();
 					orderOfOperations();
-					str7 = itemArrayMeta+"";
+					str7 += extracted+"";
+					str7 += itemArrayMeta;
 
-					while(itemArrayMeta.contains(2)||itemArrayMeta.contains(3)||itemArrayMeta.contains(4)||itemArrayMeta.contains(5)||itemArrayMeta.contains(6)){
+					while(itemArrayMeta.contains(2)||itemArrayMeta.contains(3)||itemArrayMeta.contains(4)||itemArrayMeta.contains(5)||itemArrayMeta.contains(6)||itemArrayMeta.contains(9)){
 						caulactedNumber = splitAndConquer();
 						// removeSingularSections();
 					}
@@ -422,10 +411,10 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 // Include?
 			// String returnThis_ = "";
 			// if(false){ returnThis_ += "["+extracted+"] ";}
-			// if(true){  returnThis_ += "itemArrayMeta: ["+itemArrayMeta+"] ";}
+			// if(false){  returnThis_ += "itemArrayMeta: ["+itemArrayMeta+"] ";}
 			// if(false){ returnThis_ += "numberArray: ["+numberArray+"] ";}
-			// if(true){  returnThis_ += "operatorArray: ["+operatorArray+"] ";}
-			// if(true){  returnThis_ += "debugDouble: ["+debugDouble+"] ";}
+			// if(false){  returnThis_ += "operatorArray: ["+operatorArray+"] ";}
+			// if(false){  returnThis_ += "debugDouble: ["+debugDouble+"] ";}
 			// if(false){ returnThis_ += "debugStr: ["+debugStr+"] ";}
 
 // Remove .0 artificat from caulactedNumber
@@ -485,7 +474,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		}
 
 		public void removeSingularSections(){
-			for(int i = 1; i < itemArrayMeta.size(); i++){
+			for(int i = 1; i < itemArrayMeta.size(); i++){//Put in if i first?
 				if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
 					itemArrayMeta.remove(i+2);
 					itemArrayMeta.remove(i-1);
@@ -506,9 +495,47 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			boolean innerGo_ = true;
 			int j;
 			int sevenEightCount = 0;
+			// 7, 7, 1, 2, 7, 1, 9, 8, 8
+			int operators_[] = {6,6,5,4};//,3,2};
+			int currentOperatorNum_ = 9;
+// SPECIAL CASE: factorial //TODO: merge into one again?
+			for(int i = 0; i < itemArrayMeta.size(); i++){
+				currentMeta_ = itemArrayMeta.get(i);
+				innerGo_ = true;
+				if(currentMeta_ == currentOperatorNum_){
+					j = i;
+					while(innerGo_){
+						if(itemArrayMeta.get(j) == 7){
+							sevenEightCount++;
+						}else if((itemArrayMeta.get(j) == 8)){
+								sevenEightCount--;
+						}
+						if(sevenEightCount == 0){
+							itemArrayMeta.add(j+1,8);
+							numberArray.add(j+1,null);
+							innerGo_ = false;
+						}
+						j++;
+					}
+					j = i-1;
 
-			int operators_[] = {/*9,9,*/6,6,5,4};//,3,2};
-			int currentOperatorNum_;
+					innerGo_ = true;
+					while(innerGo_){
+						if(itemArrayMeta.get(j) == 8){
+							sevenEightCount++;
+						}else if((itemArrayMeta.get(j) == 7)){
+								sevenEightCount--;
+						}
+						if(sevenEightCount == 0){
+							itemArrayMeta.add(j,7);
+							numberArray.add(j,null);
+							innerGo_ = false;
+						}
+						j--;
+					}
+				i = i + 2;}
+			}
+
 			for(int k = 0; k < operators_.length; k = k+2){
 				currentOperatorNum_ = operators_[k];
 				for(int i = 0; i < itemArrayMeta.size(); i++){
@@ -530,6 +557,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 							j++;
 						}
 						j = i-1;
+
 						innerGo_ = true;
 						while(innerGo_){
 							if(itemArrayMeta.get(j) == 8){
@@ -553,8 +581,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			int closestItemMetaA_ = -1;
 			int closestItemMetaB_ = -1;
 			ArrayList<Integer> itemArrayMeta_ = new ArrayList<Integer>();
-
-
 
 			for(int i = 0; i < itemArrayMeta.size()+1; i++){
 				if(itemArrayMeta.get(i) == 7){ // '('
@@ -582,15 +608,16 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		}
 
 		public BigDecimal /*boolean*/ doMath(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_, int locationTakenFrom_){
+			str7 += "*"+itemArrayMeta_+""+numberArray_+"*";
 			BigDecimal presentNumber_ = new BigDecimal("0");//BigDecimal.ZERO);
-			BigDecimal currentNum_;
+			BigDecimal currentNum_ = new BigDecimal("0");
+			// BigDecimal lastNum_;
 			int currentOperator_ = -1;
 			int currentMeta_ =-1;
 			int lastMeta_ = -1;
 			// int numArrayPlace_ = 0;
 			int operatorArrayPlace_ = 0;
 			MathContext mc_ = new MathContext(18);//longestValueLength(numberArray)-1);
-
 			for(int i = 0; i < itemArrayMeta_.size();i++){
 				currentMeta_ = itemArrayMeta_.get(i);
 
@@ -604,7 +631,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					if(currentNum_ == null){
 						// return "there was a problem";
 					}
-
+					// 2+2f+0
+					// 121921
 					if(i == 0){//TODO: Remove
 						presentNumber_ = numberArray_.get(0);
 					} else {
@@ -621,18 +649,20 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 							// debugDouble /= currentNum_;
 						}else if(lastMeta_ == 6){
 							presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
-						}else if(lastMeta_ == 9){ //factorial
-							for(int j = currentNum_.intValue(); j > 0; j--){
-								presentNumber_ = presentNumber_.multiply(new BigDecimal(j),mc_);
-							}
 						}
 					}
-
-				}else{//If an operator
+				/*}else{*/ //If an operator
+				}else if(currentMeta_ == 9){ //factorial
+					// presentNumber_ = presentNumber_.add(new BigDecimal("200"),mc_);
+					for(int j = currentNum_.intValue()-1; j > 1; j--){
+						presentNumber_ = presentNumber_.multiply(new BigDecimal(j),mc_);
+							// str7 += "*"+presentNumber_+"*";
+						// str7 += ":"+(presentNumber_.multiply(new BigDecimal(j),mc_)+":");
+					}
 				}
 				lastMeta_ = currentMeta_;
 			}
-			// str7 += "_"+presentNumber_+"";
+
 
 			// Add number back to arrayList
 			// itemArrayMeta.add(locationTakenFrom_, 1);// 1 = number
@@ -694,6 +724,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("\\b(plus|added)\\b", "+");
 			input_ = input_.replaceAll("\\b(minus|subtracted|subtacts)\\b", "−");
 			input_ = input_.replaceAll("pow", "^");
+			input_ = input_.replaceAll("\\b(!)\\b", "f");
+			// input_ = input_.replaceAll("\\b(*)\\b", "✕");
 
 // SPECIAL CASES
 			input_ = input_.replaceAll("neg","−");
@@ -717,7 +749,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 // String to num converter
 			input_ = allToNum(input_);
 
-
 			input_ = "  "+input_+"  ";
 			String tempInputA_;
 			String tempInputB_;
@@ -737,7 +768,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 						input_ = tempInputA_ + tempInputB_;
 			}	}	}
 
-			if(input_.indexOf("+")==-1&&input_.indexOf("-")==-1&&input_.indexOf("^")==-1&&input_.indexOf("✕")==-1&&input_.indexOf("÷")==-1&&input_.indexOf("(")==-1&&input_.indexOf(")")==-1&&input_.indexOf("(")==-1&&input_.indexOf("!")==-1){
+			if(input_.indexOf("+")==-1&&input_.indexOf("-")==-1&&input_.indexOf("^")==-1&&input_.indexOf("✕")==-1&&input_.indexOf("÷")==-1&&input_.indexOf("(")==-1&&input_.indexOf(")")==-1&&input_.indexOf("(")==-1&&input_.indexOf(/*"\\b(!)\\b"*/"f")==-1){
 				return "";
 			}
 			return input_;
@@ -768,10 +799,11 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		public String allToNum(String input_){
 			input_ = input_+"  ";
 
-			String simpleStrings1[] = {"first","second","third","fourth","fifth","sixth","Seventh","Eighth","nineth","tenth"};//,"eleventh","twelveth"};
+			String simpleStrings1[] = {"first","second","third","fourth","fifth","sixth","seventh","eighth","nineth","tenth"};//,"eleventh","twelveth"};
 			for(int i = 0; i < simpleStrings1.length; i++){
 				input_ = input_.replaceAll(simpleStrings1[i],"_"+(i+1));
 			}
+			// if(true){return input_;}
 
 			// String simpleStrings[][] = {{"zero","0"},{"one","1"},{"two","2"},{"three","3"},{"four","4"},{"",""}};
 			String simpleStrings2[] = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"};
