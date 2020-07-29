@@ -44,8 +44,9 @@ import java.math.*;
  * @author Florian Quirin (RestrauntDemo - this file's template)
  * @author 42null		  (BasicMath - this file)
  * 
- * @version #0.02.03.2
+ * @version #0.02.03.3
  * 
+ * @TakeNote: The last upload did not save my commit changes explaining what had changed, there will be a new version out soon enuoght that will replace version #0.02.03.2
  */
 public class BasicMath implements ServiceInterface {
 	
@@ -244,8 +245,12 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 		@Override
 		public String extract(String input) {
-			boolean dontReturn = false;
+			input = input.replaceAll(" ","");
 			String extracted = removeUnwanted(input+" ");// ' ' required to add ending seperation
+			while(extracted.charAt(0) == ' '){
+				extracted = extracted.substring(1,extracted.length()-1);
+			}
+			// extracted = "0+"+extracted+" ";
 			if(extracted.equals("")){
 				return "";
 			}else if(extracted.equals("--help")){
@@ -273,7 +278,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				boolean canAdd = false;
 				BigDecimal intermideate_;
 				Boolean whileRan_ = false;
-				extracted = "(0+("+extracted+")"+dontUseMeStr;
+				extracted = "(("+extracted+")"+dontUseMeStr;
 				extracted = extracted.replaceAll(" ","");
 // ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator, 2 = wrapper ( '(' or ')' )
 				boolean notANumber = true;
@@ -323,9 +328,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 						itemArrayMeta.add(7); //Operator (
 					}else if(currentChar_ == ')'){
 						itemArrayMeta.add(8); //Operator )
-					}else if(("j"+currentChar_).equals("j!") || currentChar_ == 'f'){
+					/*}else if(("j"+currentChar_).equals("j!") || currentChar_ == 'f'){
 						itemArrayMeta.add(9); //Operator ! (factorial)
-					}else if(currentChar_ == 'π'){	//Sepcial number case - pi
+					*/}else if(currentChar_ == 'π'){	//Sepcial number case - pi
 						notANumber = false;
 						itemArrayMeta.add(1); //Number
 						numberArray.add(new BigDecimal(Double.parseDouble("3.14159265358979323846")));
@@ -714,6 +719,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			}
 
 // "Wake" words
+			input_ = input_.replaceAll("whatis","");
+			input_ = input_.replaceAll("caulacate","");
 			input_ = input_.replaceAll("\\b(whatis|caulacate)\\b", "");
 
 // OPERATORS
@@ -748,7 +755,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 // String to num converter
 			input_ = allToNum(input_);
-
 			input_ = "  "+input_+"  ";
 			String tempInputA_;
 			String tempInputB_;
@@ -771,6 +777,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			if(input_.indexOf("+")==-1&&input_.indexOf("-")==-1&&input_.indexOf("^")==-1&&input_.indexOf("✕")==-1&&input_.indexOf("÷")==-1&&input_.indexOf("(")==-1&&input_.indexOf(")")==-1&&input_.indexOf("(")==-1&&input_.indexOf(/*"\\b(!)\\b"*/"f")==-1){
 				return "";
 			}
+			input_ = input_.replaceAll(" ","");
 			return input_;
 		}
 
@@ -803,7 +810,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			for(int i = 0; i < simpleStrings1.length; i++){
 				input_ = input_.replaceAll(simpleStrings1[i],"_"+(i+1));
 			}
-			// if(true){return input_;}
 
 			// String simpleStrings[][] = {{"zero","0"},{"one","1"},{"two","2"},{"three","3"},{"four","4"},{"",""}};
 			String simpleStrings2[] = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"};
