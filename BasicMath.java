@@ -1,10 +1,9 @@
-package net.b07z.sepia.sdk.services.uid1003;
+package net.b07z.sepia.sdk.services.uid1003;//Will need to switch to assistant user to make public to all users.
 
 import java.util.TreeSet;
 
 import org.json.simple.JSONObject;
 
-// import net.b07z.sepia.sdk.services.uid1003.GetFirstNumber;
 import net.b07z.sepia.server.assist.answers.ServiceAnswers;
 import net.b07z.sepia.server.assist.assistant.LANGUAGES;
 import net.b07z.sepia.server.assist.data.Parameter;
@@ -27,7 +26,6 @@ import net.b07z.sepia.server.core.assistant.PARAMETERS;
 import net.b07z.sepia.server.core.data.Answer;
 import net.b07z.sepia.server.core.data.Language;
 import net.b07z.sepia.server.core.tools.Debugger;
-import net.b07z.sepia.server.core.tools.JSON;
 import net.b07z.sepia.server.core.tools.Sdk;
 import net.b07z.sepia.server.assist.data.Card;
 import net.b07z.sepia.server.assist.data.Card.ElementType;
@@ -44,17 +42,23 @@ import java.math.*;
  * @author Florian Quirin (RestrauntDemo - this file's template)
  * @author 42null		  (BasicMath - this file)
  * 
- * @version #0.02.03.3
+ * @moreInfo: SEPIA Framework Website: https://github.com/SEPIA-Framework/
+ * @moreInfo: My Personal Repository : https://github.com/42null/42null-SEPIA-Extensions/
+ * @dateInstalled: 
+ * @commitID: 
  * 
- * @TakeNote: The last upload did not save my commit changes explaining what had changed, there will be a new version out soon enuoght that will replace version #0.02.03.2
+ * @version #0.02.04.3
+ * 
+ * @TakeNote:
  */
 public class BasicMath implements ServiceInterface {
 	
-	//Command name of your service (will be combined with userId to be unique)
-	private static final String CMD_NAME = "basic_math";
+private static final String CMD_NAME = "basic_math";
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false;
+private static final boolean expermentalMode = true; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
+private static final int displayMode = 1; //Will be superseeded by debugMode, currently choose from 1-2, search for #displayMode
 private static final String[] wakeWords = {"whatis","caulacate"};
 // -----------------------------------------------------------------------
 
@@ -64,29 +68,30 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 	public TreeSet<String> getSampleSentences(String lang) {
 		TreeSet<String> samples = new TreeSet<>();
 		//GERMAN
-		if (lang.equals(Language.DE.toValue())){
-		//OTHER
-		}else{
-			samples.add("Whatis help");
-			samples.add("Whatis 5.43331 times (nineteen / forty seven point nine 7)");
-		}
+		// if (lang.equals(Language.DE.toValue())){
+		// //OTHER
+		// }else{
+			samples.add("whatis help");
+			samples.add("Whatis 5.43331 times (nineteen / forty seven point nine 7) plus neg pi");
+		// }
 		return samples;
 	}
 	
-	//Basic service setup:
-	
-	//Overriding the 'getAnswersPool' methods enables you to define custom answers with more complex features.
-	//You can build a pool of answers that can have multiple versions of the same answer used for different 
-	//situations like a repeated question (what was the time? -> sorry say again, what was the time? -> ...).
-
 	@Override
 	public ServiceAnswers getAnswersPool(String language) {
 		ServiceAnswers answerPool = new ServiceAnswers(language);
 		
 		//Build English answers
-		if (language.equals(LANGUAGES.EN)){
+		// if (language.equals(LANGUAGES.EN)){
+			if(displayMode == 1){ // Return 
+				answerPool.addAnswer(successAnswer, 0, "Ok, <1>");
+			}else if(displayMode == 2){
+				answerPool.addAnswer(successAnswer, 0, "Ok, that would be <1>");
+			}else{
+				answerPool.addAnswer(successAnswer, 0, "You did not select a valid number for your displayMode. <1>");
+			}
 			answerPool
-				.addAnswer(successAnswer, 0, "Ok, that would be <1>")
+				
 								//example of how to use the 'shortcut' to add an answer
 				
 				.addAnswer(okAnswer, 0, "Sorry there has been an error @okAnswer")
@@ -99,12 +104,11 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				;
 			return answerPool;
 		
-		//Other languages are not used in this demo yet
-		}else{
-			return null;
-		}
+		//Other languages are not used in this project yet
+		// }else{
+		// 	return null;
+		// }
 	}
-	//We keep a reference here for easy access in getResult - Note that custom answers need to start with a certain prefix
 	private static final String failAnswer = "error_0a";
 	private static final String successAnswer = ServiceAnswers.ANS_PREFIX + "restaurant_success_0a";
 	private static final String okAnswer = ServiceAnswers.ANS_PREFIX + "restaurant_still_ok_0a";
@@ -126,21 +130,19 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		//Direct-match trigger sentences in different languages:
 		String EN = Language.EN.toValue();
 		/*info.setCustomTriggerRegX(".*\\b("
-					+ "(whatis|caulacate)\\b.* (+|-|/|^)"
+					+ "(|caulacate)\\b.* (+|-|/|^)"
 				+ ")\\b.*", EN);*/
 
 		String tempString = "";
 		for(int i = 0; i < wakeWords.length; i++){
 			tempString += wakeWords[i]+"|";
 		}
-		tempString = tempString.substring(0,tempString.length()-2);
-		info.setCustomTriggerRegX(tempString,EN);
+		tempString = tempString.substring(0,tempString.length()-1);
+		info.setCustomTriggerRegX("\\b("+tempString+")\\b",EN);
 
 		info.setCustomTriggerRegXscoreBoost(5);		//boost service a bit to increase priority over similar ones
 		
 		//Parameters:
-		
-		//This service has a number of required parameters (without them we can't complete the reservation).
 		//Required parameters will be asked automatically by SEPIA using the defined question.
 		
 		Parameter p1 = new Parameter(new GetFirstNumber())
@@ -157,7 +159,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			//.addCustomAnswer("askTimeAndDate", askTimeAndDate); 	//optional, just for info
 		
 		//Add answer parameters that are used to replace <1>, <2>, ... in your answers.
-		//The name is arbitrary but you need to use the same one in getResult(...) later for api.resultInfoPut(...)
 		info.addAnswerParameters("firstNumber");//, "number", "name"); 	//<1>=time, <2>=number, ...
 		
 		return info;
@@ -176,8 +177,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		Parameter nameParameter = nluResult.getRequiredParameter(GetFirstNumber.class.getName());
 		String firstNumber = nameParameter.getValueAsString();
 		
-		//get optional parameters
-		//NONE
 		
 		//Set answer parameters as defined in getInfo():
 		api.resultInfoPut("firstNumber", firstNumber);
@@ -188,15 +187,11 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		// /*boolean wasSent =*/ service.sendFollowUpMessage(nluResult.input, service.buildResult());
 		//Just for demo purposes we add a button-action with a link to the SDK
 
-		// if(pageToReturn == 1){
-		// }
-
 		if((firstNumber).contains("--{:Help Page:}--")){
 			api.addAction(ACTIONS.BUTTON_IN_APP_BROWSER);
 			api.putActionInfo("url", "https://github.com/42null/42null-SEPIA-Extensions");
 			api.putActionInfo("title", "Source code");
 			
-			//... and we also add a demo card
 			Card card = new Card(Card.TYPE_SINGLE);
 			JSONObject linkCard = card.addElement(
 					ElementType.link, 
@@ -230,6 +225,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		String debugStr = "";
 		char dontUseMeChar = 'j';//TODO: Add a detection to check if this character is used
 		String dontUseMeStr = "j";
+		boolean dontReturn = false;//TODO: Do something with this
 
 // Moved to be more global
 		ArrayList<BigDecimal> numberArray = new ArrayList<BigDecimal>();
@@ -242,10 +238,13 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		int pageToReturn; // 1= help page, 
 		boolean disclaimerPi = false;
 		boolean disclaimerFactorial = false;
+		
 
 		@Override
 		public String extract(String input) {
-			input = input.replaceAll(" ","");
+			// if(true){return input;}
+
+			// input = input.replaceAll(" ","");
 			String extracted = removeUnwanted(input+" ");// ' ' required to add ending seperation
 			while(extracted.charAt(0) == ' '){
 				extracted = extracted.substring(1,extracted.length()-1);
@@ -265,19 +264,17 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			}
 			// extracted = extracted.replace(dontUseMeChar,' ');//TODO: Fix this
 			extracted = extracted.replaceAll(dontUseMeStr,"");
-			
 
 			//English
-
 			if (this.language.equals(LANGUAGES.EN)){
+			// if(true){
 				// debugStr = extracted;
-
 				char currentChar_;
 				String currentItem_ = "";
 				int currentItemMeta_;
 				boolean canAdd = false;
 				BigDecimal intermideate_;
-				Boolean whileRan_ = false;
+				// Boolean whileRan_ = false;
 				extracted = "(("+extracted+")"+dontUseMeStr;
 				extracted = extracted.replaceAll(" ","");
 // ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator, 2 = wrapper ( '(' or ')' )
@@ -287,26 +284,30 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					currentChar_ = extracted.charAt(i);
 
 					// if(i = extracted.length){
-
 					// }
-					if(isCharNumber(currentChar_) || currentChar_ == '.' || currentChar_ == '−'){
+
+					// if(((currentChar_ == '−') && (extracted.charAt(i+1) != 'π'))){
+					// 	return "eeeeeeee";
+					// }else if((currentChar_ == '−') && (extracted.charAt(i+1) == 'π')){
+					// 	return "eee2eeeee";
+					// }
+
+					if(isCharNumber(currentChar_) || currentChar_ == '.' || ((currentChar_ == '−') && (extracted.charAt(i+1) != 'π'))){
 						notANumber = false;
 
 						if(currentChar_ == '−'){
 							currentChar_ = '-';
-						}else{
-							currentChar_ = extracted.charAt(i);
 						}
 
-						if(!whileRan_){
-							currentItem_ += currentChar_;
-						}else{
-							whileRan_ = false;
-						}
+						// if(!whileRan_){
+						currentItem_ += currentChar_;
+						// }else{
+						// 	whileRan_ = false;
+						// }
 						
 
 						if(!(isCharNumber(extracted.charAt(i+1)) || (extracted.charAt(i+1)) == '.')){
-							intermideate_ = new BigDecimal(Double.parseDouble(currentItem_)+"");
+							intermideate_ = new BigDecimal(currentItem_+"");
 							numberArray.add(intermideate_);
 							itemArrayMeta.add(1); //Number
 							currentItem_ = "";
@@ -316,7 +317,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 // operatorArray: 0 = unknown/error, + = 1, - = 2, ✕ = 3, ÷ = 4
 					}else if(currentChar_ == '+'){
 						itemArrayMeta.add(2); //Operator +
-					}else if(currentChar_ == '-'){
+					}else if(currentChar_ == '-'){// && extracted.charAt(i) != '−'){
 						itemArrayMeta.add(3); //Operator -
 					}else if(currentChar_ == '✕'){
 						itemArrayMeta.add(4); //Operator ✕
@@ -328,23 +329,38 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 						itemArrayMeta.add(7); //Operator (
 					}else if(currentChar_ == ')'){
 						itemArrayMeta.add(8); //Operator )
-					/*}else if(("j"+currentChar_).equals("j!") || currentChar_ == 'f'){
-						itemArrayMeta.add(9); //Operator ! (factorial)
-					*/}else if(currentChar_ == 'π'){	//Sepcial number case - pi
+					}else if(("j"+currentChar_).equals("j!") || currentChar_ == 'f'){
+						if(expermentalMode){
+							itemArrayMeta.add(9); //Operator ! (factorial)
+						}
+					}else if(currentChar_ == 'π'){	//Sepcial number case - pi
 						notANumber = false;
 						itemArrayMeta.add(1); //Number
-						numberArray.add(new BigDecimal(Double.parseDouble("3.14159265358979323846")));
+						// str7 = currentItem_;
+						// currentItem_ = "-";
+
+						if(extracted.charAt(i-1) == '−'){ //TODO: Make more efficent
+							numberArray.add(new BigDecimal("-3.14159265358979323"));
+							// numberArray.add(new BigDecimal("3.14159265358979323"));
+						}else{
+							numberArray.add(new BigDecimal("3.14159265358979323"));
+						}
+						// numberArray.add(new BigDecimal(currentItem_+"3.14159265358979323"));//846"));
 						currentItem_ = "";
-					}else if(currentChar_ == '_'){ //Special case - out of order powers
+					}else if(currentChar_ == '_' && expermentalMode){ //Special case - out of order powers
 						notANumber = false;
-						
+						// 2_4^
+						// 2^4
 						itemArrayMeta.add(1); //Number
 						numberArray.add(new BigDecimal(Double.parseDouble(currentItem_.substring(0,currentItem_.length()-2))+""));
-						extracted = extracted.replaceFirst("^","");
+						extracted = extracted.replaceFirst("^","");//TODO: fix bug from replaceFirst to propper
 						extracted = extracted.replaceFirst("_","^");
 						// extracted = extracted.substring(0,i)+"^"+extracted.charAt(i+1)+extracted.substring(0,i);
 						currentItem_ = "";
 						// return extracted;
+					}else if(currentChar_ == '−'){
+						notANumber = false;
+						return "ghjklohgvfghkpkhgvb";
 					}
 
 					if(notANumber){
@@ -379,17 +395,14 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					// MathContext mc_ = new MathContext(18);//longestValueLength(numberArray)-1);
 
 					addInMultiplication();
-					// fixOutOfPlacePowers(); //Fixed and no longer uses this module, it will likley be removed in a future version
 					removeSingularSections();
 					orderOfOperations();
 					str7 += extracted+"";
 					str7 += itemArrayMeta;
-
 					while(itemArrayMeta.contains(2)||itemArrayMeta.contains(3)||itemArrayMeta.contains(4)||itemArrayMeta.contains(5)||itemArrayMeta.contains(6)||itemArrayMeta.contains(9)){
 						caulactedNumber = splitAndConquer();
 						// removeSingularSections();
 					}
-
 				// check some specials and access account if allowed
 				// if (extracted.equals("my")){
 				// 	//access account
@@ -425,7 +438,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 // Remove .0 artificat from caulactedNumber
 			String caulactedNumberStr = caulactedNumber+"";
 			if((caulactedNumber.doubleValue() % 1) == 0 && !(caulactedNumberStr.contains("E+"))){
-				caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("."));
+				// caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("."));
 			}
 
 			if(disclaimerPi){
@@ -436,9 +449,10 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			}
 
 
-			if(dontReturn){
-				return "";
-			}else if(debugMode){
+			// if(dontReturn){
+			// 	return "";
+			// }else 
+			if(debugMode){
 				// return debugDouble+""+" debugStr =_"+debugStr+/*" operatorArray: "+operatorArray+" itemArrayMeta: "+itemArrayMeta+*/"_ numberArray: "+numberArray+/*" extracted: _"+extracted+*/"_ str7:"+str7;
 				String returnThis = caulactedNumber+"_";
 				returnThis += "numberArray: "+numberArray+"_";
@@ -447,8 +461,14 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				// returnThis += "numberPlace: "+numberPlace+"_";
 				// returnThis += "extracted: "+extracted+"_";
 				return returnThis;
-			}else{
+// #displayMode
+			}else if(displayMode == 1){ // Return 
+				extracted = extracted.substring(1,extracted.length());//Remove first '('
+				return extracted +" would be "+caulactedNumberStr+""; // Return answer with extracted (also changes return statement)
+			}else if(displayMode == 2){ // Just return the answer (and disclaimers)
 				return caulactedNumberStr+"";
+			}else{
+				return "Error at #displayMode, you need a valid number";
 			}
 		}
 		
@@ -466,17 +486,17 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		// 1 6 1 
 		// 2 n 3 
 
-		public void fixOutOfPlacePowers(){
-			for(int i = 1; i < itemArrayMeta.size()-1; i++){
-				if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i+1)==1 && itemArrayMeta.get(i+2)==6){
-					itemArrayMeta.remove(i+2);
-					itemArrayMeta.add(i+1, 6); // ^
-					numberArray.remove(i+2);
-					numberArray.add(i+1,null);
-					i = 1;//TODO: Can I make this more efficent?
-				}
-			}
-		}
+		// public void fixOutOfPlacePowers(){
+		// 	for(int i = 1; i < itemArrayMeta.size()-1; i++){
+		// 		if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i+1)==1 && itemArrayMeta.get(i+2)==6){
+		// 			itemArrayMeta.remove(i+2);
+		// 			itemArrayMeta.add(i+1, 6); // ^
+		// 			numberArray.remove(i+2);
+		// 			numberArray.add(i+1,null);
+		// 			i = 1;//TODO: Can I make this more efficent?
+		// 		}
+		// 	}
+		// }
 
 		public void removeSingularSections(){
 			for(int i = 1; i < itemArrayMeta.size(); i++){//Put in if i first?
@@ -502,43 +522,46 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			int sevenEightCount = 0;
 			// 7, 7, 1, 2, 7, 1, 9, 8, 8
 			int operators_[] = {6,6,5,4};//,3,2};
-			int currentOperatorNum_ = 9;
-// SPECIAL CASE: factorial //TODO: merge into one again?
-			for(int i = 0; i < itemArrayMeta.size(); i++){
-				currentMeta_ = itemArrayMeta.get(i);
-				innerGo_ = true;
-				if(currentMeta_ == currentOperatorNum_){
-					j = i;
-					while(innerGo_){
-						if(itemArrayMeta.get(j) == 7){
-							sevenEightCount++;
-						}else if((itemArrayMeta.get(j) == 8)){
-								sevenEightCount--;
-						}
-						if(sevenEightCount == 0){
-							itemArrayMeta.add(j+1,8);
-							numberArray.add(j+1,null);
-							innerGo_ = false;
-						}
-						j++;
-					}
-					j = i-1;
-
+			int currentOperatorNum_;
+			if(expermentalMode){
+				currentOperatorNum_ = 9;
+				// SPECIAL CASE: factorial //TODO: merge into one again?
+				for(int i = 0; i < itemArrayMeta.size(); i++){
+					currentMeta_ = itemArrayMeta.get(i);
 					innerGo_ = true;
-					while(innerGo_){
-						if(itemArrayMeta.get(j) == 8){
-							sevenEightCount++;
-						}else if((itemArrayMeta.get(j) == 7)){
-								sevenEightCount--;
+					if(currentMeta_ == currentOperatorNum_){
+						j = i;
+						while(innerGo_){
+							if(itemArrayMeta.get(j) == 7){
+								sevenEightCount++;
+							}else if((itemArrayMeta.get(j) == 8)){
+									sevenEightCount--;
+							}
+							if(sevenEightCount == 0){
+								itemArrayMeta.add(j+1,8);
+								numberArray.add(j+1,null);
+								innerGo_ = false;
+							}
+							j++;
 						}
-						if(sevenEightCount == 0){
-							itemArrayMeta.add(j,7);
-							numberArray.add(j,null);
-							innerGo_ = false;
+						j = i-1;
+
+						innerGo_ = true;
+						while(innerGo_){
+							if(itemArrayMeta.get(j) == 8){
+								sevenEightCount++;
+							}else if((itemArrayMeta.get(j) == 7)){
+									sevenEightCount--;
+							}
+							if(sevenEightCount == 0){
+								itemArrayMeta.add(j,7);
+								numberArray.add(j,null);
+								innerGo_ = false;
+							}
+							j--;
 						}
-						j--;
-					}
-				i = i + 2;}
+					i = i + 2;}
+				}
 			}
 
 			for(int k = 0; k < operators_.length; k = k+2){
@@ -613,7 +636,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		}
 
 		public BigDecimal /*boolean*/ doMath(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_, int locationTakenFrom_){
-			str7 += "*"+itemArrayMeta_+""+numberArray_+"*";
+			// str7 += "*"+itemArrayMeta_+""+numberArray_+"*";
 			BigDecimal presentNumber_ = new BigDecimal("0");//BigDecimal.ZERO);
 			BigDecimal currentNum_ = new BigDecimal("0");
 			// BigDecimal lastNum_;
@@ -684,7 +707,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		public static String returnHelp(){
 			String returnThis_;
 			returnThis_ =  "--{:Help Page:}-- ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ";// \n
-			returnThis_ += "Simplemath is a sdk extenson that uses the 'Whatis' or 'caulacate' command to solve math problems. It can handle addition, subtraction, multiplication, division, whole powers, negitive numbers, pi, parenthesies, order of operations, spelled out numbers and more, this extension is still under construction.";// It uses no external API's";
+			returnThis_ += "Simplemath is a sdk extenson that uses the 'Whatis' or 'caulacate' command to solve math problems. It can currently addition, subtraction, multiplication, division, whole powers, negitive numbers, pi, parenthesies, order of operations, spelled out numbers and more, this extension is still under construction.";// It uses no external API's";
 			return returnThis_;
 		}
 
@@ -719,9 +742,20 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			}
 
 // "Wake" words
-			input_ = input_.replaceAll("whatis","");
-			input_ = input_.replaceAll("caulacate","");
-			input_ = input_.replaceAll("\\b(whatis|caulacate)\\b", "");
+			String tempString_="";
+			for(int i = wakeWords.length-1; i >= 0; i--){//Keep with '>='? (trying to keep it as lightweight on processing as possable)
+				// tempString_ += wakeWords[i]+"|";
+				input_ = input_.replaceAll(wakeWords[i], "");
+			}
+			// tempString_ = tempString_.substring(0,tempString_.length()-2);//Not useing removeLast or removeSpace to save on processing resources
+			// input_ = input_.replaceAll("\\b("+tempString_+")\\b", "");
+
+			input_ = input_.replaceAll("eighty","80"); //For problems with eighty //TOD: Find a better solution to this problem
+
+// String to num converter
+			input_ = input_.replaceAll("pow", "^");
+			input_ = allToNum(input_);
+			// if(true){return input_;}
 
 // OPERATORS
 			input_ = input_.replaceAll("multiplied", "✕");
@@ -729,9 +763,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("divided", "÷");
 			input_ = input_.replaceAll("/", "÷");
 			input_ = input_.replaceAll("\\b(plus|added)\\b", "+");
-			input_ = input_.replaceAll("\\b(minus|subtracted|subtacts)\\b", "−");
+			input_ = input_.replaceAll("\\b(minus|subtracted|subtacts)\\b", "-");
 			input_ = input_.replaceAll("pow", "^");
-			input_ = input_.replaceAll("\\b(!)\\b", "f");
+			// input_ = input_.replaceAll("\\b(!)\\b", "f");
 			// input_ = input_.replaceAll("\\b(*)\\b", "✕");
 
 // SPECIAL CASES
@@ -739,7 +773,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("pi","π");//3.14159265358979323846
 			input_ = input_.replaceAll("squared","^2");
 			input_ = input_.replaceAll("cubed","^3");
-			input_ = input_.replaceAll("point", "z");// "∙"
+			input_ = input_.replaceAll("\\b(point|dot)\\b", "z");// "∙"
 			// TODO: Find a way to replaceAll point to ".", the . is haveing problems and I have spent way to long on it			
 
 // FILLER/SPACER WORDS
@@ -751,11 +785,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("and", "");
 			input_ = input_.replaceAll("itive", ""); //(For negitive)
 			input_ = input_.replaceAll("er", ""); //(For power)
-
-
-// String to num converter
-			input_ = allToNum(input_);
-			input_ = "  "+input_+"  ";
+			
 			String tempInputA_;
 			String tempInputB_;
 			while(input_.contains("z")){ //TODO: Because the length can change, should I modify "i" during exucution to improve effecencey?
@@ -777,7 +807,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			if(input_.indexOf("+")==-1&&input_.indexOf("-")==-1&&input_.indexOf("^")==-1&&input_.indexOf("✕")==-1&&input_.indexOf("÷")==-1&&input_.indexOf("(")==-1&&input_.indexOf(")")==-1&&input_.indexOf("(")==-1&&input_.indexOf(/*"\\b(!)\\b"*/"f")==-1){
 				return "";
 			}
-			input_ = input_.replaceAll(" ","");
+			// input_ = input_.replaceAll(" ","");
 			return input_;
 		}
 
@@ -808,39 +838,37 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 			String simpleStrings1[] = {"first","second","third","fourth","fifth","sixth","seventh","eighth","nineth","tenth"};//,"eleventh","twelveth"};
 			for(int i = 0; i < simpleStrings1.length; i++){
-				input_ = input_.replaceAll(simpleStrings1[i],"_"+(i+1));
+				input_ = input_.replaceAll(simpleStrings1[i],("_"+(i+1)));
 			}
 
-			// String simpleStrings[][] = {{"zero","0"},{"one","1"},{"two","2"},{"three","3"},{"four","4"},{"",""}};
+			// String simpleStrings[][] = {{"zero","0"},{"one","1("},{"two","2"},{"three","3"},{"four","4"},{"",""}};
 			String simpleStrings2[] = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"};
 			for(int i = 0; i < simpleStrings2.length; i++){
 				input_ = input_.replaceAll(simpleStrings2[i],i+"");
 			}
 
-			input_ = input_.replaceAll("t","");
-
 			int firstOccurenceLocation_;
 			char nextChar_ = ' ';
-			while(input_.indexOf("y") != -1){
-				firstOccurenceLocation_ = input_.indexOf("y");
+			while(input_.indexOf("ty") != -1){
+				firstOccurenceLocation_ = input_.indexOf("ty");
 				nextChar_ = input_.charAt(firstOccurenceLocation_+1);
 				if(nextChar_ == ' '){
 					nextChar_ = input_.charAt(firstOccurenceLocation_+2);
 				}
 				if(isCharNumber(nextChar_) || nextChar_=='.'){
-					input_ = input_.replaceFirst("y","");
+					input_ = input_.replaceFirst("ty","");
 				}else{
-					input_ = input_.replaceFirst("y","0");
+					input_ = input_.replaceFirst("ty","0");
 				}
 			}
 
-			while(input_.indexOf("een") != -1){
+			while(input_.indexOf("teen") != -1){
 				firstOccurenceLocation_ = input_.indexOf("een");
 				input_ = input_.substring(0,firstOccurenceLocation_-1)+"1"+input_.substring(firstOccurenceLocation_-1,input_.length());
 				input_ = input_.replaceFirst("een","");
 			}
 
-			String simpleStringsTy[][] = {{"wen","2"},{"hir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"housand","000"},{"million","000000"}};
+			String simpleStringsTy[][] = {{"twen","2"},{"thir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"housand","000"},{"million","000000"},{"billion","000000000"},{"trillion","000000000000"}};
 			for(int i = 0; i < simpleStringsTy.length; i++){
 				input_ = input_.replaceAll(simpleStringsTy[i][0],simpleStringsTy[i][1]);//(?i)
 			}
@@ -874,7 +902,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			//any errors?
 			}else if (input.equals("<user_data_unresolved>")){
 				this.buildSuccess = false;
-				return ""; 		//TODO: this probably should become something like 'Interview.ERROR_USER_DATA_ACCESS' in the future;
+				return "";
+				// return "Error <user_data_unresolved>"; 		//TODO: this probably should become something like 'Interview.ERROR_USER_DATA_ACCESS' in the future;
 			}else{
 				//build result with entry for field "VALUE"
 				JSONObject itemResultJSON = JSON.make(InterviewData.VALUE, input);
