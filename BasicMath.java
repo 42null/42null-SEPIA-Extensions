@@ -47,7 +47,7 @@ import java.math.*;
  * @dateInstalled: 
  * @commitID: 
  * 
- * @version #0.02.04.3
+ * @version #0.02.06.0
  * 
  * @TakeNote:
  */
@@ -140,7 +140,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		tempString = tempString.substring(0,tempString.length()-1);
 		info.setCustomTriggerRegX("\\b("+tempString+")\\b",EN);
 
-		info.setCustomTriggerRegXscoreBoost(5);		//boost service a bit to increase priority over similar ones
+		info.setCustomTriggerRegXscoreBoost(10);		//boost service a bit to increase priority over similar ones
 		
 		//Parameters:
 		//Required parameters will be asked automatically by SEPIA using the defined question.
@@ -223,9 +223,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 	public static class GetFirstNumber extends CustomParameter {
 		boolean debugMode = false; //TODO: Include a operator in input, also, should their be a int and then we could have difrent modes? 
 		String debugStr = "";
-		char dontUseMeChar = 'j';//TODO: Add a detection to check if this character is used
+		char dontUseMeChar = 'j';//TODO: Add a detection to check if this character is used, is this realy nessery though?
 		String dontUseMeStr = "j";
-		boolean dontReturn = false;//TODO: Do something with this
 
 // Moved to be more global
 		ArrayList<BigDecimal> numberArray = new ArrayList<BigDecimal>();
@@ -238,31 +237,41 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		int pageToReturn; // 1= help page, 
 		boolean disclaimerPi = false;
 		boolean disclaimerFactorial = false;
-		
+		// TODO: Fix (#)
 
 		@Override
 		public String extract(String input) {
-			// if(true){return input;}
 
-			// input = input.replaceAll(" ","");
+			// numberArray.add(new BigDecimal("-3.14159265358979323"));//846
+
+			// if(true){return input;}
+			// input = input.replaceAll("zero","0");
+			input = input.replaceAll(" ","");
 			String extracted = removeUnwanted(input+" ");// ' ' required to add ending seperation
-			while(extracted.charAt(0) == ' '){
-				extracted = extracted.substring(1,extracted.length()-1);
-			}
-			// extracted = "0+"+extracted+" ";
 			if(extracted.equals("")){
 				return "";
 			}else if(extracted.equals("--help")){
 				pageToReturn = 1;
 				return returnHelp();
+			}else if(extracted.contains("test")){
+				return "This is BasicMath running, I was able to detect your usage of 'test'.";
 			}else if(extracted.contains("π")){//"--pi")){
-				// extracted.replaceAll("--pi","");//TODO: To make it more effishant should I just do substring?
-				// extracted = extracted.substring(0,extracted.length()-3);//Remove "--pi"
 				disclaimerPi = true;
 			}else if(extracted.contains("!")){
 				disclaimerFactorial = true;
+			}else{}
+			if(extracted.equals(" π ")){// Special Case
+				return "π would be 3.14159265358979323, for more digits see https://www.piday.org/million/.";
 			}
-			// extracted = extracted.replace(dontUseMeChar,' ');//TODO: Fix this
+			// if(true){return ">"+extracted+"<";}
+
+			if(extracted.indexOf("+")==-1&&extracted.indexOf("-")==-1&&extracted.indexOf("^")==-1&&extracted.indexOf("✕")==-1&&extracted.indexOf("÷")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(")")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(/*"\\b(!)\\b"*/"f")==-1){
+				return "";
+			}
+			while(extracted.charAt(0) == ' ' && !(extracted.equals(""))){
+				extracted = extracted.substring(1,extracted.length()-1);
+			}
+
 			extracted = extracted.replaceAll(dontUseMeStr,"");
 
 			//English
@@ -275,6 +284,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				boolean canAdd = false;
 				BigDecimal intermideate_;
 				// Boolean whileRan_ = false;
+				extracted = extracted.replaceAll("zero","0");  //Last ditch resort
+				extracted = extracted.replaceAll("−π","(0-π)");//Last ditch resort
 				extracted = "(("+extracted+")"+dontUseMeStr;
 				extracted = extracted.replaceAll(" ","");
 // ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator, 2 = wrapper ( '(' or ')' )
@@ -283,15 +294,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				for(int i = 0; i < extracted.length()-1; i++){
 					currentChar_ = extracted.charAt(i);
 
-					// if(i = extracted.length){
-					// }
-
-					// if(((currentChar_ == '−') && (extracted.charAt(i+1) != 'π'))){
-					// 	return "eeeeeeee";
-					// }else if((currentChar_ == '−') && (extracted.charAt(i+1) == 'π')){
-					// 	return "eee2eeeee";
-					// }
-
 					if(isCharNumber(currentChar_) || currentChar_ == '.' || ((currentChar_ == '−') && (extracted.charAt(i+1) != 'π'))){
 						notANumber = false;
 
@@ -299,12 +301,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 							currentChar_ = '-';
 						}
 
-						// if(!whileRan_){
 						currentItem_ += currentChar_;
-						// }else{
-						// 	whileRan_ = false;
-						// }
-						
 
 						if(!(isCharNumber(extracted.charAt(i+1)) || (extracted.charAt(i+1)) == '.')){
 							intermideate_ = new BigDecimal(currentItem_+"");
@@ -333,36 +330,32 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 						if(expermentalMode){
 							itemArrayMeta.add(9); //Operator ! (factorial)
 						}
-					}else if(currentChar_ == 'π'){	//Sepcial number case - pi
+					}else if(currentChar_ == 'π'){	//Sepcial number case (pi)
 						notANumber = false;
 						itemArrayMeta.add(1); //Number
-						// str7 = currentItem_;
-						// currentItem_ = "-";
-
-						if(extracted.charAt(i-1) == '−'){ //TODO: Make more efficent
-							numberArray.add(new BigDecimal("-3.14159265358979323"));
-							// numberArray.add(new BigDecimal("3.14159265358979323"));
-						}else{
-							numberArray.add(new BigDecimal("3.14159265358979323"));
-						}
-						// numberArray.add(new BigDecimal(currentItem_+"3.14159265358979323"));//846"));
+						numberArray.add(new BigDecimal("3.14159265358979323"));//846
 						currentItem_ = "";
+					// }else if(currentChar_ == '−' && (extracted.charAt(i+1) == 'π')){	//Sepcial number case (neg pi)
+					// 	notANumber = false;
+					// 	itemArrayMeta.add(1); //Number
+					// 	numberArray.add(new BigDecimal("3.14159265358979323"));//846
+					// 	// extracted = extracted.substring(0,i-1)+extracted.substring(i+1,extracted.length());
+					// 	extracted = extracted.replaceAll("π","");
+					// 	currentItem_ = "";
+					// 	// return extracted;
 					}else if(currentChar_ == '_' && expermentalMode){ //Special case - out of order powers
 						notANumber = false;
 						// 2_4^
 						// 2^4
 						itemArrayMeta.add(1); //Number
 						numberArray.add(new BigDecimal(Double.parseDouble(currentItem_.substring(0,currentItem_.length()-2))+""));
-						extracted = extracted.replaceFirst("^","");//TODO: fix bug from replaceFirst to propper
+						extracted = extracted.replaceFirst("^","");
 						extracted = extracted.replaceFirst("_","^");
 						// extracted = extracted.substring(0,i)+"^"+extracted.charAt(i+1)+extracted.substring(0,i);
 						currentItem_ = "";
 						// return extracted;
-					}else if(currentChar_ == '−'){
-						notANumber = false;
-						return "ghjklohgvfghkpkhgvb";
 					}
-
+					
 					if(notANumber){
 						// intermideate_ = new BigDecimal(Double.parseDouble(currentItem_)+"");
 						numberArray.add(null);
@@ -401,7 +394,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					str7 += itemArrayMeta;
 					while(itemArrayMeta.contains(2)||itemArrayMeta.contains(3)||itemArrayMeta.contains(4)||itemArrayMeta.contains(5)||itemArrayMeta.contains(6)||itemArrayMeta.contains(9)){
 						caulactedNumber = splitAndConquer();
-						// removeSingularSections();
+						orderOfOperations();
 					}
 				// check some specials and access account if allowed
 				// if (extracted.equals("my")){
@@ -449,7 +442,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			}
 
 
-			// if(dontReturn){
 			// 	return "";
 			// }else 
 			if(debugMode){
@@ -499,7 +491,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		// }
 
 		public void removeSingularSections(){
-			for(int i = 1; i < itemArrayMeta.size(); i++){//Put in if i first?
+			for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if i first?
+				if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
 				if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
 					itemArrayMeta.remove(i+2);
 					itemArrayMeta.remove(i-1);
@@ -637,13 +630,12 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 		public BigDecimal /*boolean*/ doMath(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_, int locationTakenFrom_){
 			// str7 += "*"+itemArrayMeta_+""+numberArray_+"*";
-			BigDecimal presentNumber_ = new BigDecimal("0");//BigDecimal.ZERO);
+			BigDecimal presentNumber_ = numberArray_.get(0);
 			BigDecimal currentNum_ = new BigDecimal("0");
 			// BigDecimal lastNum_;
 			int currentOperator_ = -1;
 			int currentMeta_ =-1;
 			int lastMeta_ = -1;
-			// int numArrayPlace_ = 0;
 			int operatorArrayPlace_ = 0;
 			MathContext mc_ = new MathContext(18);//longestValueLength(numberArray)-1);
 			for(int i = 0; i < itemArrayMeta_.size();i++){
@@ -655,29 +647,24 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					// if(currentNum_ = null){
 					// 	return "You need an operator";}
 					currentNum_ = numberArray_.get(i);
-					// numArrayPlace_++;
 					if(currentNum_ == null){
 						// return "there was a problem";
 					}
 					// 2+2f+0
 					// 121921
-					if(i == 0){//TODO: Remove
-						presentNumber_ = numberArray_.get(0);
-					} else {
-						if(lastMeta_ == 2 /*currentOperator_== 1*/){
-							presentNumber_ = presentNumber_.add(currentNum_,mc_);
-						}else if(lastMeta_ == 3){
-							presentNumber_ = presentNumber_.subtract(currentNum_,mc_);
-							// debugDouble -= currentNum_;
-						}else if(lastMeta_ == 4){
-							presentNumber_ = presentNumber_.multiply(currentNum_,mc_);
-							// debugDouble *= currentNum_;
-						}else if(lastMeta_ == 5){
-							presentNumber_ = presentNumber_.divide(currentNum_,mc_);
-							// debugDouble /= currentNum_;
-						}else if(lastMeta_ == 6){
-							presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
-						}
+					if(lastMeta_ == 2 /*currentOperator_== 1*/){
+						presentNumber_ = presentNumber_.add(currentNum_,mc_);
+					}else if(lastMeta_ == 3){
+						presentNumber_ = presentNumber_.subtract(currentNum_,mc_);
+						// debugDouble -= currentNum_;
+					}else if(lastMeta_ == 4){
+						presentNumber_ = presentNumber_.multiply(currentNum_,mc_);
+						// debugDouble *= currentNum_;
+					}else if(lastMeta_ == 5){
+						presentNumber_ = presentNumber_.divide(currentNum_,mc_);
+						// debugDouble /= currentNum_;
+					}else if(lastMeta_ == 6){
+						presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
 					}
 				/*}else{*/ //If an operator
 				}else if(currentMeta_ == 9){ //factorial
@@ -691,15 +678,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				lastMeta_ = currentMeta_;
 			}
 
-
-			// Add number back to arrayList
-			// itemArrayMeta.add(locationTakenFrom_, 1);// 1 = number
-			// itemArrayMeta.add(locationTakenFrom_, presentNumber_);
-			// CONSIDERATION: Clean up to be in order?
-			numberArray.remove(locationTakenFrom_-1);//Remove (
+			numberArray.remove(locationTakenFrom_-1);//Removes "("
 			itemArrayMeta.add(locationTakenFrom_,1);
 			numberArray.add(locationTakenFrom_,presentNumber_);
-			// numberPlace.add(locationTakenFrom_);
 
 			return presentNumber_;
 		}
@@ -732,6 +713,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		}
 
 		public String removeUnwanted(String input_){
+			// if(true){return input_;}
 			input_ = input_.toLowerCase();
 
 			if(input_.contains("help")){
@@ -753,7 +735,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("eighty","80"); //For problems with eighty //TOD: Find a better solution to this problem
 
 // String to num converter
-			input_ = input_.replaceAll("pow", "^");
 			input_ = allToNum(input_);
 			// if(true){return input_;}
 
@@ -762,18 +743,29 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("times", "✕");
 			input_ = input_.replaceAll("divided", "÷");
 			input_ = input_.replaceAll("/", "÷");
-			input_ = input_.replaceAll("\\b(plus|added)\\b", "+");
-			input_ = input_.replaceAll("\\b(minus|subtracted|subtacts)\\b", "-");
+			// input_ = input_.replaceAll("\\b(plus|added)\\b", "+");
+			input_ = input_.replaceAll("plus", "+");
+			input_ = input_.replaceAll("added", "+");
+			
+			// input_ = input_.replaceAll("\\b(minus|subtracted|subtacts)\\b", "-");
+			input_ = input_.replaceAll("minus", "-");
+			input_ = input_.replaceAll("subtracted", "-");
+			input_ = input_.replaceAll("subtacts", "-");
+
 			input_ = input_.replaceAll("pow", "^");
+			// input_ = input_.replaceAll("*", "✕");
 			// input_ = input_.replaceAll("\\b(!)\\b", "f");
 			// input_ = input_.replaceAll("\\b(*)\\b", "✕");
 
 // SPECIAL CASES
-			input_ = input_.replaceAll("neg","−");
+			input_ = input_.replaceAll("neg","−");//−");
 			input_ = input_.replaceAll("pi","π");//3.14159265358979323846
 			input_ = input_.replaceAll("squared","^2");
 			input_ = input_.replaceAll("cubed","^3");
-			input_ = input_.replaceAll("\\b(point|dot)\\b", "z");// "∙"
+			// input_ = input_.replaceAll("\\b(point|dot)\\b", "ź");// "∙"
+			input_ = input_.replaceAll("point","ź");
+			input_ = input_.replaceAll("dot","ź");
+
 			// TODO: Find a way to replaceAll point to ".", the . is haveing problems and I have spent way to long on it			
 
 // FILLER/SPACER WORDS
@@ -786,27 +778,27 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			input_ = input_.replaceAll("itive", ""); //(For negitive)
 			input_ = input_.replaceAll("er", ""); //(For power)
 			
-			String tempInputA_;
-			String tempInputB_;
-			while(input_.contains("z")){ //TODO: Because the length can change, should I modify "i" during exucution to improve effecencey?
-				for(int i = 0; i < input_.length()-1; i++){
-					if(input_.charAt(i) == 'z'){
-						if(input_.charAt(i-1) == ' '){
-							tempInputA_ = (input_.substring(0,i-1))+".";
-						}else{
-							tempInputA_ = (input_.substring(0,i))+".";
-						}
-						if(input_.charAt(i+1) == ' '){
-							tempInputB_ = input_.substring(i+2,input_.length()-1);
-						}else{
-							tempInputB_ = input_.substring(i+1,input_.length()-1);
-						}
-						input_ = tempInputA_ + tempInputB_;
-			}	}	}
 
-			if(input_.indexOf("+")==-1&&input_.indexOf("-")==-1&&input_.indexOf("^")==-1&&input_.indexOf("✕")==-1&&input_.indexOf("÷")==-1&&input_.indexOf("(")==-1&&input_.indexOf(")")==-1&&input_.indexOf("(")==-1&&input_.indexOf(/*"\\b(!)\\b"*/"f")==-1){
-				return "";
-			}
+			while(input_.contains("ź")){
+				String tempInputA_;
+				String tempInputB_;	
+				for(int i = 0; i < input_.length(); i++){
+					if(input_.charAt(i) == 'ź'){
+						// if(input_.charAt(i-1) == ' '){
+						// 	tempInputA_ = (input_.substring(0,i-1))+".";
+						// }else{
+						// 	tempInputA_ = (input_.substring(0,i))+".";
+						// }
+						// if(input_.charAt(i+1) == ' '){
+						// 	tempInputB_ = input_.substring(i+2,input_.length()-1);
+						// }else{
+						// 	tempInputB_ = input_.substring(i+1,input_.length()-1);
+						// }
+						input_ = (input_.substring(0,i))+"."+input_.substring(i+1,input_.length());
+						// tempInputB_ = input_.substring(i+1,input_.length()-1);
+						// input_ = tempInputA_ + tempInputB_;
+			}	}	}
+			// input_+="ttt";
 			// input_ = input_.replaceAll(" ","");
 			return input_;
 		}
@@ -841,10 +833,15 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				input_ = input_.replaceAll(simpleStrings1[i],("_"+(i+1)));
 			}
 
+			// input_ = input_.replaceAll(simpleStrings2[i],i+"");
 			// String simpleStrings[][] = {{"zero","0"},{"one","1("},{"two","2"},{"three","3"},{"four","4"},{"",""}};
+			// input_ = input_.replaceAll("zero","0");
+			// input_ = "zero+fivetwo";
+			// if(true){return input_;}
 			String simpleStrings2[] = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"};
 			for(int i = 0; i < simpleStrings2.length; i++){
-				input_ = input_.replaceAll(simpleStrings2[i],i+"");
+				// if(i==0){input_ = input_.replaceAll("zero","0");}else{
+				input_ = input_.replaceAll(simpleStrings2[i],(""+i+""));//}
 			}
 
 			int firstOccurenceLocation_;
@@ -852,9 +849,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			while(input_.indexOf("ty") != -1){
 				firstOccurenceLocation_ = input_.indexOf("ty");
 				nextChar_ = input_.charAt(firstOccurenceLocation_+1);
-				if(nextChar_ == ' '){
-					nextChar_ = input_.charAt(firstOccurenceLocation_+2);
-				}
 				if(isCharNumber(nextChar_) || nextChar_=='.'){
 					input_ = input_.replaceFirst("ty","");
 				}else{
@@ -868,7 +862,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				input_ = input_.replaceFirst("een","");
 			}
 
-			String simpleStringsTy[][] = {{"twen","2"},{"thir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"housand","000"},{"million","000000"},{"billion","000000000"},{"trillion","000000000000"}};
+			// input_ = input_.replaceAll("zero","0");
+
+			String simpleStringsTy[][] = {{"twen","2"},{"thir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"thousand","000"},{"million","000000"},{"billion","000000000"},{"trillion","000000000000"}};
 			for(int i = 0; i < simpleStringsTy.length; i++){
 				input_ = input_.replaceAll(simpleStringsTy[i][0],simpleStringsTy[i][1]);//(?i)
 			}
