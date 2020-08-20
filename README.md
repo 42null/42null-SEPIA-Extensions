@@ -1,4 +1,7 @@
 # 42null-SEPIA-Extensions
+
+(!!!) It is way past my bedtime and due to haveing been dumped hours of homework uppon before the school year has even started I have not had any time this week to compleate the deadline of Wednesday. Because I would rather delay the release again to iron out bugs instead of sending out something I am not proud of I cannot send the merge request now.
+
 This is my repository for the SEPIA framework extensions that I have written. I am so glad to have found a java based local processing voice assistant I would love to contrubute in the only way I know how.
 
 <p><b>In Progress Extensions</b>
