@@ -47,10 +47,12 @@ import java.math.*;
  * @dateInstalled: 
  * @commitID: 
  * 
- * @version #0.02.06.0
+ * @version #0.02.08.1
  * 
  * @TakeNote:
  */
+
+//  TODO: /0 and give version
 public class BasicMath implements ServiceInterface {
 	
 private static final String CMD_NAME = "basic_math";
@@ -58,12 +60,24 @@ private static final String CMD_NAME = "basic_math";
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false;
 private static final boolean expermentalMode = true; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
-private static final int displayMode = 1; //Will be superseeded by debugMode, currently choose from 1-2, search for #displayMode
+private static final int displayMode = 2; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
 private static final String[] wakeWords = {"whatis","caulacate"};
 // -----------------------------------------------------------------------
 
-	//Define some sentences for testing:
-	
+// ------------------------- #PEREMENT BUG AREA --------------------------
+/* This area is for bugs that are outside of my control from a program 
+prespective, because even just returing exactly what was given as an input
+yealds a crash I am unable to fix what I cannot modify/work with. Because 
+of this, please for your own conveance try to avoid triggureing these 
+bugs. They will not always trigger when you use them so it is just best to
+prevent their usage. In most cases just putting 0+ before your program 
+will fix the issue. I tried haveing it automaticaly put 0+ automaticaly 
+but the crash happens before I can access the users input.
+/*
+// -----------------------------------------------------------------------
+
+
+
 	@Override
 	public TreeSet<String> getSampleSentences(String lang) {
 		TreeSet<String> samples = new TreeSet<>();
@@ -72,7 +86,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		// //OTHER
 		// }else{
 			samples.add("whatis help");
-			samples.add("Whatis 5.43331 times (nineteen / forty seven point nine 7) plus neg pi");
+			samples.add("Whatis neg 5.43331 times (nineteen / forty seven point nine 7) plus (0 - pi) to the power of neg one?");
 		// }
 		return samples;
 	}
@@ -82,18 +96,16 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		ServiceAnswers answerPool = new ServiceAnswers(language);
 		
 		//Build English answers
-		// if (language.equals(LANGUAGES.EN)){
+		if (language.equals(LANGUAGES.EN)){
 			if(displayMode == 1){ // Return 
 				answerPool.addAnswer(successAnswer, 0, "Ok, <1>");
 			}else if(displayMode == 2){
-				answerPool.addAnswer(successAnswer, 0, "Ok, that would be <1>");
+				answerPool.addAnswer(successAnswer, 0, "Ok, <1>");
 			}else{
 				answerPool.addAnswer(successAnswer, 0, "You did not select a valid number for your displayMode. <1>");
 			}
 			answerPool
-				
-								//example of how to use the 'shortcut' to add an answer
-				
+								
 				.addAnswer(okAnswer, 0, "Sorry there has been an error @okAnswer")
 				.addAnswer(askFirstNumber, 0, "Sorry, it appears that you did not enter any operators, could you please add some?")
 						// Answer.Character.neutral, 2, 5))
@@ -105,9 +117,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			return answerPool;
 		
 		//Other languages are not used in this project yet
-		// }else{
-		// 	return null;
-		// }
+		}else{
+			return null;
+		}
 	}
 	private static final String failAnswer = "error_0a";
 	private static final String successAnswer = ServiceAnswers.ANS_PREFIX + "restaurant_success_0a";
@@ -152,11 +164,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		info.addParameter(p1);//.addParameter(p2).addParameter(p3);
 		
 		//Answers (these are the default answers, you can trigger a custom answer at any point in the module 
-		//with serviceBuilder.setCustomAnswer(..)):
 		info.addSuccessAnswer(successAnswer)
 			.addFailAnswer(failAnswer)
 			.addOkayAnswer(okAnswer);
-			//.addCustomAnswer("askTimeAndDate", askTimeAndDate); 	//optional, just for info
 		
 		//Add answer parameters that are used to replace <1>, <2>, ... in your answers.
 		info.addAnswerParameters("firstNumber");//, "number", "name"); 	//<1>=time, <2>=number, ...
@@ -181,12 +191,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 		//Set answer parameters as defined in getInfo():
 		api.resultInfoPut("firstNumber", firstNumber);
 		
-		//This service basically cannot fail ... ;-)
-		// ... here you would call your reservation method/API/program ...
-
-		// /*boolean wasSent =*/ service.sendFollowUpMessage(nluResult.input, service.buildResult());
-		//Just for demo purposes we add a button-action with a link to the SDK
-
 		if((firstNumber).contains("--{:Help Page:}--")){
 			api.addAction(ACTIONS.BUTTON_IN_APP_BROWSER);
 			api.putActionInfo("url", "https://github.com/42null/42null-SEPIA-Extensions");
@@ -241,15 +245,16 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 		@Override
 		public String extract(String input) {
-
-			// numberArray.add(new BigDecimal("-3.14159265358979323"));//846
+			ArrayList<Integer> collectedItemArrayMeta_ = new ArrayList<Integer>();
+			ArrayList<BigDecimal> collectedNumberArray_ = new ArrayList<BigDecimal>();
 
 			// if(true){return input;}
 			// input = input.replaceAll("zero","0");
 			input = input.replaceAll(" ","");
-			String extracted = removeUnwanted(input+" ");// ' ' required to add ending seperation
+			String extracted = removeUnwanted(/*"0plus"+*/input+" ");// ' ' required to add ending seperation
+			// if(true){return extracted;}
 			if(extracted.equals("")){
-				return "";
+				return "removeUnwanted(input+' ') returned an empty string";
 			}else if(extracted.equals("--help")){
 				pageToReturn = 1;
 				return returnHelp();
@@ -259,15 +264,17 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				disclaimerPi = true;
 			}else if(extracted.contains("!")){
 				disclaimerFactorial = true;
-			}else{}
-			if(extracted.equals(" π ")){// Special Case
+			}
+
+			if(extracted.equals("(π) ")){// Special Case
 				return "π would be 3.14159265358979323, for more digits see https://www.piday.org/million/.";
 			}
 			// if(true){return ">"+extracted+"<";}
 
 			if(extracted.indexOf("+")==-1&&extracted.indexOf("-")==-1&&extracted.indexOf("^")==-1&&extracted.indexOf("✕")==-1&&extracted.indexOf("÷")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(")")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(/*"\\b(!)\\b"*/"f")==-1){
-				return "";
+				return "Error: No operators detected";
 			}
+			
 			while(extracted.charAt(0) == ' ' && !(extracted.equals(""))){
 				extracted = extracted.substring(1,extracted.length()-1);
 			}
@@ -276,17 +283,17 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 			//English
 			if (this.language.equals(LANGUAGES.EN)){
-			// if(true){
 				// debugStr = extracted;
 				char currentChar_;
 				String currentItem_ = "";
 				int currentItemMeta_;
 				boolean canAdd = false;
 				BigDecimal intermideate_;
+				String recreated_;
 				// Boolean whileRan_ = false;
 				extracted = extracted.replaceAll("zero","0");  //Last ditch resort
 				extracted = extracted.replaceAll("−π","(0-π)");//Last ditch resort
-				extracted = "(("+extracted+")"+dontUseMeStr;
+				extracted = "("+extracted+")"+dontUseMeStr;
 				extracted = extracted.replaceAll(" ","");
 // ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator, 2 = wrapper ( '(' or ')' )
 				boolean notANumber = true;
@@ -309,7 +316,6 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 							itemArrayMeta.add(1); //Number
 							currentItem_ = "";
 						}
-
 
 // operatorArray: 0 = unknown/error, + = 1, - = 2, ✕ = 3, ÷ = 4
 					}else if(currentChar_ == '+'){
@@ -374,103 +380,131 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 				// debugStr = itemArrayMeta+"";
 // ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator (includes parenthesies),
 // operatorArray: 0 = unknown/error, + = 1, - = 2, ✕ = 3, ÷ = 4, ^ = 5
+					
+					// itemArrayMeta.add(1,1);
+					// numberArray.add(1,new BigDecimal("0"));
+					// itemArrayMeta.add(2,2);
+					// numberArray.add(2,null);
 
-					// debugDouble = 0.0;
-					// BigDecimal presentNumber_ = new BigDecimal("0");//BigDecimal.ZERO);
-					// // double currentNum_ = 0;
-					// BigDecimal currentNum_;
-					// int currentOperator_ = -1;
-					// int currentMeta_;
-					// int lastMeta_ = -1;
-					// int numArrayPlace_ = 0;
-					// int operatorArrayPlace_ = 0;
+					if(displayMode == 2){//For Fancy
+						addInMultiplication();
+						collectedItemArrayMeta_ = new ArrayList<Integer>(itemArrayMeta);
+						collectedNumberArray_ = new ArrayList<BigDecimal>(numberArray);
+						recreated_ = recreateInput(collectedItemArrayMeta_,collectedNumberArray_);
+						itemArrayMeta = new ArrayList<Integer>(collectedItemArrayMeta_);
+						numberArray = new ArrayList<BigDecimal>(collectedNumberArray_);
+					}else{
+						removeSingularSections();
+						addInMultiplication();
+						collectedItemArrayMeta_ = new ArrayList<Integer>(itemArrayMeta);
+						collectedNumberArray_ = new ArrayList<BigDecimal>(numberArray);
+						recreated_ = recreateInput(collectedItemArrayMeta_,collectedNumberArray_);
+					}
 
-					// MathContext mc_ = new MathContext(18);//longestValueLength(numberArray)-1);
+					// for(int i = 0; i < itemArrayMeta.size();i++){//@@@@HERE@@@@@
+					// 	// if(numberArray.get(i).compareTo(new BigDecimal(3.14159265358979323))==0){
+					// 	if((numberArray.get(i)+"").equals(""+(new BigDecimal(3.14159265358979323)))){
+					// 		// itemArrayMeta.add(i+1,8);
+					// 		// itemArrayMeta.add(i,7);
+					// 		// numberArray.add(i+1,null);
+					// 		// numberArray.add(i,null);
+					// 	}
+					// }
 
-					addInMultiplication();
 					removeSingularSections();
+					addInMultiplication();
 					orderOfOperations();
+					itemArrayMeta.add(0,7);
+					itemArrayMeta.add(8);
+					numberArray.add(0,null);
+					numberArray.add(null);
+					//FOR -DEBUG
 					str7 += extracted+"";
-					str7 += itemArrayMeta;
+					str7 += collectedItemArrayMeta_;
+					//END -DEBUG
 					while(itemArrayMeta.contains(2)||itemArrayMeta.contains(3)||itemArrayMeta.contains(4)||itemArrayMeta.contains(5)||itemArrayMeta.contains(6)||itemArrayMeta.contains(9)){
 						caulactedNumber = splitAndConquer();
-						orderOfOperations();
+						orderOfOperations();//Is this nessery?
 					}
-				// check some specials and access account if allowed
-				// if (extracted.equals("my")){
-				// 	//access account
-				// 	ServiceAccessManager sam = new ServiceAccessManager("demoKey");
-				// 	if (sam.isAllowedToAccess(ACCOUNT.USER_NAME_LAST)){
-				// 		extracted = nluInput.user.getName(sam);
-				// 	}else{
-				// 		//refuse and ask again - a real service should handle this with a more specific follow-up question
-				// 		extracted = "<user_data_unresolved>"; 
-				// 	}
+					
+
+	// Include?
+				// String returnThis_ = "";
+				// if(false){ returnThis_ += "["+extracted+"] ";}
+				// if(false){  returnThis_ += "itemArrayMeta: ["+itemArrayMeta+"] ";}
+				// if(false){ returnThis_ += "numberArray: ["+numberArray+"] ";}
+				// if(false){  returnThis_ += "operatorArray: ["+operatorArray+"] ";}
+				// if(false){  returnThis_ += "debugDouble: ["+debugDouble+"] ";}
+				// if(false){ returnThis_ += "debugStr: ["+debugStr+"] ";}
+
+	// Remove .0 artificat from caulactedNumber: Cannot get index of "."
+				String caulactedNumberStr = caulactedNumber+"";
+				// if((caulactedNumber.doubleValue() % 1) == 0 && !(caulactedNumberStr.contains("E+")) && caulactedNumberStr.contains("\\.")){
+				// 	caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("\\."));
 				// }
-			
-			//Other languages
+
+				if(disclaimerPi){
+					caulactedNumberStr +=", for π the approximation of '3.14159265358979312' was used.";
+				}
+				if(disclaimerFactorial){
+					caulactedNumberStr += " Factorial (!) was used, please note that due to the structure of this program your answer may not be acurate.";
+				}
+
+
+				if(debugMode){
+					// return debugDouble+""+" debugStr =_"+debugStr+/*" operatorArray: "+operatorArray+" itemArrayMeta: "+itemArrayMeta+*/"_ numberArray: "+numberArray+/*" extracted: _"+extracted+*/"_ str7:"+str7;
+					String returnThis = caulactedNumber+"_";
+					returnThis += "numberArray: "+numberArray+"_";
+					returnThis += "itemArrayMeta: "+itemArrayMeta+"_";
+					returnThis += "str7: "+str7+"_";
+					// returnThis += "numberPlace: "+numberPlace+"_";
+					// returnThis += "extracted: "+extracted+"_";
+					return returnThis;
+	// #displayMode
+				}else if(displayMode == 1){ // Return 
+					return recreated_ +" would be "+caulactedNumberStr+""; // Return answer with extracted (also changes return statement)
+				}else if(displayMode == 2){ // Return 
+					return recreated_ +" would be "+caulactedNumberStr+""; // Return answer with extracted (also changes return statement) and enables fancy
+				}else if(displayMode == 3){ // Just return the answer (and disclaimers)
+					return caulactedNumberStr+"";
+				}else{
+					return "Error at #displayMode, you need to set a valid number";
+				}
+	//Other languages
 			}else{
 				Debugger.println("Custom parameter 'firstNumber' does not support language: " + this.language, 1);
-			}
-			
-			//Reconstruct original text format (before normalization) - This is just a cosmetic change
-			// if (!extracted.isEmpty()){
-			// 	Normalizer normalizer = new NormalizerLight();
-			// 	extracted = normalizer.reconstructPhrase(nluInput.textRaw, extracted);
-			// }
-
-// Include?
-			// String returnThis_ = "";
-			// if(false){ returnThis_ += "["+extracted+"] ";}
-			// if(false){  returnThis_ += "itemArrayMeta: ["+itemArrayMeta+"] ";}
-			// if(false){ returnThis_ += "numberArray: ["+numberArray+"] ";}
-			// if(false){  returnThis_ += "operatorArray: ["+operatorArray+"] ";}
-			// if(false){  returnThis_ += "debugDouble: ["+debugDouble+"] ";}
-			// if(false){ returnThis_ += "debugStr: ["+debugStr+"] ";}
-
-// Remove .0 artificat from caulactedNumber
-			String caulactedNumberStr = caulactedNumber+"";
-			if((caulactedNumber.doubleValue() % 1) == 0 && !(caulactedNumberStr.contains("E+"))){
-				// caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("."));
-			}
-
-			if(disclaimerPi){
-				caulactedNumberStr +=", for π the approximation of '3.14159265358979312' was used.";
-			}
-			if(disclaimerFactorial){
-				caulactedNumberStr += " Factorial (!) was used, please note that due to the structure of this program your answer may not be acurate.";
-			}
-
-
-			// 	return "";
-			// }else 
-			if(debugMode){
-				// return debugDouble+""+" debugStr =_"+debugStr+/*" operatorArray: "+operatorArray+" itemArrayMeta: "+itemArrayMeta+*/"_ numberArray: "+numberArray+/*" extracted: _"+extracted+*/"_ str7:"+str7;
-				String returnThis = caulactedNumber+"_";
-				returnThis += "numberArray: "+numberArray+"_";
-				returnThis += "itemArrayMeta: "+itemArrayMeta+"_";
-				returnThis += "str7: "+str7+"_";
-				// returnThis += "numberPlace: "+numberPlace+"_";
-				// returnThis += "extracted: "+extracted+"_";
-				return returnThis;
-// #displayMode
-			}else if(displayMode == 1){ // Return 
-				extracted = extracted.substring(1,extracted.length());//Remove first '('
-				return extracted +" would be "+caulactedNumberStr+""; // Return answer with extracted (also changes return statement)
-			}else if(displayMode == 2){ // Just return the answer (and disclaimers)
-				return caulactedNumberStr+"";
-			}else{
-				return "Error at #displayMode, you need a valid number";
+				return "<Sorry but this does not support your language at this time.>";
 			}
 		}
 		
+		public String recreateInput(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_){
+			String returnThis_ = "";
+			int currentOperator_ = -1;
+
+			for(int i= 0; i < itemArrayMeta_.size(); i++){//TODO: Switch from else if to an array search through?
+				currentOperator_ = itemArrayMeta_.get(i);
+				if(currentOperator_ == 1){
+					returnThis_+=numberArray_.get(i)+"";}
+				else if(currentOperator_ == 2){returnThis_+="+";}
+				else if(currentOperator_ == 3){returnThis_+="-";}
+				else if(currentOperator_ == 4){returnThis_+="✕";}
+				else if(currentOperator_ == 5){returnThis_+="÷";}
+				else if(currentOperator_ == 6){returnThis_+="^";}
+				else if(currentOperator_ == 7){returnThis_+="(";}
+				else if(currentOperator_ == 8){returnThis_+=")";}
+				else if(currentOperator_ == 9){returnThis_+="f";}//!
+				else{returnThis_ = " There has been an error at recreateInput";} // ' ' is for automatic removal
+			}
+			return returnThis_.substring(1,returnThis_.length()-1);
+		}
+
 
 		public void addInMultiplication(){
 			for(int i = 1; i < itemArrayMeta.size()-1; i++){
 				if((itemArrayMeta.get(i)==8 && itemArrayMeta.get(i+1)==1) || (itemArrayMeta.get(i)==1 && itemArrayMeta.get(i+1)==7)){
-					itemArrayMeta.add(i+1, 4); // *
+					itemArrayMeta.add(i+1, 4); //✕
 					numberArray.add(i+1,null);
-					i = 1;//TODO: Can I make this more efficent?
+					i++;
 				}
 			}
 		}
@@ -492,7 +526,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 		public void removeSingularSections(){
 			for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if i first?
-				if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
+				// if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
 				if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
 					itemArrayMeta.remove(i+2);
 					itemArrayMeta.remove(i-1);
@@ -501,6 +535,56 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					i = 1;//TODO: Can I make this more efficent?
 				}
 			}
+		}
+		
+		// public void removeSingularSections(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_){
+		// 	for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if "i" first?
+		// 		if(itemArrayMeta_.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
+		// 			itemArrayMeta_.remove(i+2);
+		// 			itemArrayMeta_.remove(i-1);
+		// 			numberArray_.remove(i+2);
+		// 			numberArray_.remove(i-1);
+		// 			i = 1;//TODO: Can I make this more efficent?
+		// 		}
+		// 	}
+			/*
+			int timesOccured = 0;
+			int firstOccurenceLocation = -1;
+
+			// for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if "i" first?
+			// 	if(itemArrayMeta_.get(i)==7 && itemArrayMeta_.get(i+1)==7){//Make more efficent - indexOf()?
+			// 		firstOccurenceLocation = i;
+			// 		i = 1;//TODO: Can I make this more efficent?
+			// 	}else if(itemArrayMeta_.get(i)==8 && itemArrayMeta_.get(i+1)==8){
+			// 		if(i != -1){
+
+			// 		}
+			// 	}else if(itemArrayMeta_.get(i)==8 && itemArrayMeta_.get(i+1)!=8){
+			// 		firstOccurenceLocation = -1;
+			// 	}
+			// }
+//FUTURE: Note, if the number array grows and numbers above 9 are used, this code will need to be updated
+			String stringyItems_ = (itemArrayMeta_+"").replaceAll(",","");
+			stringyItems_ = stringyItems_.substring(1,stringyItems_.length()-1);
+			int openPartPlace_ = stringyItems_.indexOf("77");
+			while(stringyItems_.charAt(openPartPlace_+1)==7){
+				openPartPlace_++;
+			}
+			int shutPartPlace_ = stringyItems_.indexOf("88");
+			String subString_;
+			while(openPartPlace_!=-1 && shutPartPlace_!=1){
+				subString_ = stringyItems_.substring(openPartPlace_+1,shutPartPlace_);
+				if(hasOf(subString_,"7") == hasOf(subString_,"8")){
+					stringyItems_ = subString_;
+					numberArray_ = new ArrayList<BigDecimal>(numberArray_.subList(openPartPlace_,shutPartPlace_+1));
+				}
+			}
+*/
+		// }
+
+		// Is not used but it is nice to have
+		public int hasOf(String main_,String minor_){
+			return main_.length()-main_.replaceAll(minor_, "").length();
 		}
 
 		public void orderOfOperations(){
@@ -668,10 +752,9 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 					}
 				/*}else{*/ //If an operator
 				}else if(currentMeta_ == 9){ //factorial
-					// presentNumber_ = presentNumber_.add(new BigDecimal("200"),mc_);
 					for(int j = currentNum_.intValue()-1; j > 1; j--){
 						presentNumber_ = presentNumber_.multiply(new BigDecimal(j),mc_);
-							// str7 += "*"+presentNumber_+"*";
+						// str7 += "*"+presentNumber_+"*";
 						// str7 += ":"+(presentNumber_.multiply(new BigDecimal(j),mc_)+":");
 					}
 				}
@@ -759,7 +842,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 // SPECIAL CASES
 			input_ = input_.replaceAll("neg","−");//−");
-			input_ = input_.replaceAll("pi","π");//3.14159265358979323846
+			input_ = input_.replaceAll("pi","(π)");//3.14159265358979323846
 			input_ = input_.replaceAll("squared","^2");
 			input_ = input_.replaceAll("cubed","^3");
 			// input_ = input_.replaceAll("\\b(point|dot)\\b", "ź");// "∙"
@@ -858,7 +941,7 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 
 			while(input_.indexOf("teen") != -1){
 				firstOccurenceLocation_ = input_.indexOf("een");
-				input_ = input_.substring(0,firstOccurenceLocation_-1)+"1"+input_.substring(firstOccurenceLocation_-1,input_.length());
+				input_ = input_.substring(0,firstOccurenceLocation_-2)+"1"+input_.substring(firstOccurenceLocation_-2,input_.length());
 				input_ = input_.replaceFirst("een","");
 			}
 
@@ -898,8 +981,8 @@ private static final String[] wakeWords = {"whatis","caulacate"};
 			//any errors?
 			}else if (input.equals("<user_data_unresolved>")){
 				this.buildSuccess = false;
-				return "";
-				// return "Error <user_data_unresolved>"; 		//TODO: this probably should become something like 'Interview.ERROR_USER_DATA_ACCESS' in the future;
+				// return "";
+				return "Error <user_data_unresolved>"; 		//TODO: this probably should become something like 'Interview.ERROR_USER_DATA_ACCESS' in the future;
 			}else{
 				//build result with entry for field "VALUE"
 				JSONObject itemResultJSON = JSON.make(InterviewData.VALUE, input);
