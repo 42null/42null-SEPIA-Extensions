@@ -37,17 +37,16 @@ import java.util.ArrayList;
 import java.math.*;
 
 /**
- * Demo for a restaurant reservation service.
- * 
+ * BasicMath extension program
  * @author Florian Quirin (RestrauntDemo - this file's template)
- * @author 42null		  (BasicMath - this file)
+ * @author 42null		  (BasicMath - this file), also, anything special about this line number? :)
  * 
  * @moreInfo: SEPIA Framework Website: https://github.com/SEPIA-Framework/
  * @moreInfo: My Personal Repository : https://github.com/42null/42null-SEPIA-Extensions/
  * @dateInstalled: 
  * @commitID: 
  * 
- * @version #0.02.08.1
+ * @version #0.02.08.2
  * 
  * @TakeNote:
  */
@@ -58,9 +57,11 @@ public class BasicMath implements ServiceInterface {
 private static final String CMD_NAME = "basic_math";
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
-private static final boolean makePublic = false;
+private static final boolean makePublic = false; //This controls if this extension should be avaiable for all users.
 private static final boolean expermentalMode = true; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
-private static final int displayMode = 2; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
+private static final boolean doDisclaimers = true; //If set to false, disclaimers will not be reported.
+private static final int displayMode = 1; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
+private static final boolean keepSymbol = true; //If true, all displayModes will replace saying "3.14159265358979323" with "π".
 private static final String[] wakeWords = {"whatis","caulacate"};
 // -----------------------------------------------------------------------
 
@@ -70,10 +71,16 @@ prespective, because even just returing exactly what was given as an input
 yealds a crash I am unable to fix what I cannot modify/work with. Because 
 of this, please for your own conveance try to avoid triggureing these 
 bugs. They will not always trigger when you use them so it is just best to
-prevent their usage. In most cases just putting 0+ before your program 
-will fix the issue. I tried haveing it automaticaly put 0+ automaticaly 
-but the crash happens before I can access the users input.
-/*
+prevent their avability. In most cases just putting 0+ before your program 
+will fix the issue. I tried having it automaticaly put 0+ automaticaly 
+but the crash happens before I can access the users input meaning nothing 
+can be done.
+
+1.) "Zero"
+2.) Without 0+, n1/n1
+3.) /0, this cannot be fixed, I believe somehting is processed before I have access to it.
+
+*/
 // -----------------------------------------------------------------------
 
 
@@ -101,6 +108,8 @@ but the crash happens before I can access the users input.
 				answerPool.addAnswer(successAnswer, 0, "Ok, <1>");
 			}else if(displayMode == 2){
 				answerPool.addAnswer(successAnswer, 0, "Ok, <1>");
+			}else if(displayMode == 3){
+					answerPool.addAnswer(successAnswer, 0, "Ok, <1>");
 			}else{
 				answerPool.addAnswer(successAnswer, 0, "You did not select a valid number for your displayMode. <1>");
 			}
@@ -241,7 +250,6 @@ but the crash happens before I can access the users input.
 		int pageToReturn; // 1= help page, 
 		boolean disclaimerPi = false;
 		boolean disclaimerFactorial = false;
-		// TODO: Fix (#)
 
 		@Override
 		public String extract(String input) {
@@ -401,7 +409,7 @@ but the crash happens before I can access the users input.
 						recreated_ = recreateInput(collectedItemArrayMeta_,collectedNumberArray_);
 					}
 
-					// for(int i = 0; i < itemArrayMeta.size();i++){//@@@@HERE@@@@@
+					// for(int i = 0; i < itemArrayMeta.size();i++){
 					// 	// if(numberArray.get(i).compareTo(new BigDecimal(3.14159265358979323))==0){
 					// 	if((numberArray.get(i)+"").equals(""+(new BigDecimal(3.14159265358979323)))){
 					// 		// itemArrayMeta.add(i+1,8);
@@ -442,14 +450,22 @@ but the crash happens before I can access the users input.
 				// if((caulactedNumber.doubleValue() % 1) == 0 && !(caulactedNumberStr.contains("E+")) && caulactedNumberStr.contains("\\.")){
 				// 	caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("\\."));
 				// }
-
-				if(disclaimerPi){
-					caulactedNumberStr +=", for π the approximation of '3.14159265358979312' was used.";
+// Start Disclaimers
+				if(doDisclaimers){
+					if(disclaimerPi){
+						caulactedNumberStr +=", for π the approximation of '3.14159265358979312' was used.";
+					}
+					if(disclaimerFactorial){
+						caulactedNumberStr += " Factorial (!) was used, please note that due to the structure of this program your answer may not be acurate.";
+					}
 				}
-				if(disclaimerFactorial){
-					caulactedNumberStr += " Factorial (!) was used, please note that due to the structure of this program your answer may not be acurate.";
+// End Disclaimers
+// Start Cleanup recreated_ with pi
+				if(keepSymbol){//Convert 3.14159265358979323 to pi
+					recreated_ = recreated_.replaceAll("3.14159265358979323","π");
 				}
-
+				recreated_ = recreated_.replaceAll("(π)","π");//This does not work because of the usage of ( and )
+// End Cleanup recreated_ with pi
 
 				if(debugMode){
 					// return debugDouble+""+" debugStr =_"+debugStr+/*" operatorArray: "+operatorArray+" itemArrayMeta: "+itemArrayMeta+*/"_ numberArray: "+numberArray+/*" extracted: _"+extracted+*/"_ str7:"+str7;
@@ -465,7 +481,7 @@ but the crash happens before I can access the users input.
 					return recreated_ +" would be "+caulactedNumberStr+""; // Return answer with extracted (also changes return statement)
 				}else if(displayMode == 2){ // Return 
 					return recreated_ +" would be "+caulactedNumberStr+""; // Return answer with extracted (also changes return statement) and enables fancy
-				}else if(displayMode == 3){ // Just return the answer (and disclaimers)
+				}else if(displayMode == 3){ // Just return the answer (and disclaimers assumeing there are any)
 					return caulactedNumberStr+"";
 				}else{
 					return "Error at #displayMode, you need to set a valid number";
@@ -525,6 +541,7 @@ but the crash happens before I can access the users input.
 		// }
 
 		public void removeSingularSections(){
+			if(true){return;}
 			for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if i first?
 				// if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
 				if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
