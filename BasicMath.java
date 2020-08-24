@@ -46,23 +46,26 @@ import java.math.*;
  * @dateInstalled: 
  * @commitID: 
  * 
- * @version #0.02.08.2
+ * @versionName: 
+ * @version #0.02.08.4
  * 
- * @TakeNote:
+ * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "whatis help"
  */
 
 //  TODO: /0 and give version
 public class BasicMath implements ServiceInterface {
 	
 private static final String CMD_NAME = "basic_math";
+private static final String versionName = "PullRequest1a";
+private static final String versionNumber = "0.02.08.4";
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false; //This controls if this extension should be avaiable for all users.
 private static final boolean expermentalMode = true; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
 private static final boolean doDisclaimers = true; //If set to false, disclaimers will not be reported.
-private static final int displayMode = 1; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
+private static final int displayMode = 2; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
 private static final boolean keepSymbol = true; //If true, all displayModes will replace saying "3.14159265358979323" with "π".
-private static final String[] wakeWords = {"whatis","caulacate"};
+private static final String[] wakeWords = {"whatis","calculate"};
 // -----------------------------------------------------------------------
 
 // ------------------------- #PEREMENT BUG AREA --------------------------
@@ -79,6 +82,15 @@ can be done.
 1.) "Zero"
 2.) Without 0+, n1/n1
 3.) /0, this cannot be fixed, I believe somehting is processed before I have access to it.
+4.) n1"teen" (ex thirteen), even after extensive testing. Please use "threeteen", "thir teen", "3teen", or "13".
+
+Please contact me if you know what is crashing SEPIA before I can view the string in these cases. I am shure this is not an intended feature of whater pre-proccesing SEPIA does.
+
+Other features that have not been included (ether I have been unable to find the source or have spent way too many hours that I will never get back)
+- Negitive pi does not presently work
+- n1 to the n2th power dosen't but n1 to the power of n2 works
+- n1 ^ 0 does not work because of proccessing with BigDouble, you should know this always returns 1 though.
+
 
 */
 // -----------------------------------------------------------------------
@@ -92,8 +104,9 @@ can be done.
 		// if (lang.equals(Language.DE.toValue())){
 		// //OTHER
 		// }else{
-			samples.add("whatis help");
-			samples.add("Whatis neg 5.43331 times (nineteen / forty seven point nine 7) plus (0 - pi) to the power of neg one?");
+			samples.add("Whatis help");
+			samples.add("Whatis version");
+			samples.add("Whatis neg 5.43331 times (nineteen / forty seven point nine 7) plus (0 - pi) to the power of neg four?");
 		// }
 		return samples;
 	}
@@ -216,8 +229,22 @@ can be done.
 			);
 			JSON.put(linkCard, "imageBackground", "#000");	//more options like CSS background
 			api.addCard(card.getJSON());
-		}else if((firstNumber).contains("--pi")){
+		}else if((firstNumber).contains("getting version info...")){
+			// api.addAction(ACTIONS.BUTTON_IN_APP_BROWSER);
+			// api.putActionInfo("url", "https://github.com/42null/42null-SEPIA-Extensions");
+			// api.putActionInfo("title", "Homepage");
 			
+			Card card = new Card(Card.TYPE_SINGLE);
+			JSONObject linkCard = card.addElement(
+					ElementType.link, 
+					JSON.make("title", "BasicMath Version Information" + ":", "desc", "Version Name: <u>"+versionName+"</u><br> VersionID: <u>"+versionNumber+"</u><br> Github CommitID: <u>Unavaible</u>"),
+					null, null, "", 
+					"https://github.com/42null/42null-SEPIA-Extensions/blob/master/README.md", 
+					"https://sepia-framework.github.io/img/icon.png", 
+					null, null
+			);
+			JSON.put(linkCard, "imageBackground", "#000"/*999*/);	//more options like CSS background
+			api.addCard(card.getJSON());
 		}
 
 		//all good
@@ -266,8 +293,10 @@ can be done.
 			}else if(extracted.equals("--help")){
 				pageToReturn = 1;
 				return returnHelp();
-			}else if(extracted.contains("test")){
+			}else if(input.contains("test")){
 				return "This is BasicMath running, I was able to detect your usage of 'test'.";
+			}else if(input.contains("version")){
+				return "getting version info...";
 			}else if(extracted.contains("π")){//"--pi")){
 				disclaimerPi = true;
 			}else if(extracted.contains("!")){
@@ -368,6 +397,8 @@ can be done.
 						// extracted = extracted.substring(0,i)+"^"+extracted.charAt(i+1)+extracted.substring(0,i);
 						currentItem_ = "";
 						// return extracted;
+					}else{
+						notANumber = false;
 					}
 					
 					if(notANumber){
@@ -765,7 +796,11 @@ can be done.
 						presentNumber_ = presentNumber_.divide(currentNum_,mc_);
 						// debugDouble /= currentNum_;
 					}else if(lastMeta_ == 6){
-						presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
+						if(currentNum_.intValue() == 0){//Not working
+							presentNumber_ = new BigDecimal("1");
+						}else{
+							presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
+						}
 					}
 				/*}else{*/ //If an operator
 				}else if(currentMeta_ == 9){ //factorial
@@ -956,24 +991,24 @@ can be done.
 				}
 			}
 
-			while(input_.indexOf("teen") != -1){
-				firstOccurenceLocation_ = input_.indexOf("een");
-				input_ = input_.substring(0,firstOccurenceLocation_-2)+"1"+input_.substring(firstOccurenceLocation_-2,input_.length());
-				input_ = input_.replaceFirst("een","");
-			}
-
 			// input_ = input_.replaceAll("zero","0");
-
+			
 			String simpleStringsTy[][] = {{"twen","2"},{"thir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"thousand","000"},{"million","000000"},{"billion","000000000"},{"trillion","000000000000"}};
 			for(int i = 0; i < simpleStringsTy.length; i++){
 				input_ = input_.replaceAll(simpleStringsTy[i][0],simpleStringsTy[i][1]);//(?i)
 			}
 
-			int endStop_ = input_.length() - 2;
-			if(endStop_ < 0){
-				endStop_ = 0;
+			while(input_.contains("teen")){
+				firstOccurenceLocation_ = input_.indexOf("teen");
+				input_ = input_.substring(0,firstOccurenceLocation_-1)+"1"+input_.substring(firstOccurenceLocation_-1,input_.length());
+				input_ = input_.replaceFirst("teen","");
 			}
-			return input_.substring(0, endStop_);//Cleanup added extra spaces at the end
+
+			// int endStop_ = input_.length() - 2;
+			// if(endStop_ < 0){
+			// 	endStop_ = 0;
+			// }
+			return input_;//.substring(0, endStop_);//Cleanup added extra spaces at the end
 		}
 
 		public boolean isCharNumber(char input_){
