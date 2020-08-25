@@ -47,23 +47,24 @@ import java.math.*;
  * @commitID: 
  * 
  * @versionName: 
- * @version #0.02.08.4
+ * @version #0.02.08.9
  * 
  * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "whatis help"
  */
 
-//  TODO: /0 and give version
+
 public class BasicMath implements ServiceInterface {
 	
 private static final String CMD_NAME = "basic_math";
-private static final String versionName = "PullRequest1a";
-private static final String versionNumber = "0.02.08.4";
+// private static final String versionName = "PullRequest1aVersionUncleaned";
+private static final String versionName = "lastBeforeIdiotTest";
+private static final String versionNumber = "0.02.08.9";
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false; //This controls if this extension should be avaiable for all users.
-private static final boolean expermentalMode = true; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
+private static final boolean expermentalMode = false; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
 private static final boolean doDisclaimers = true; //If set to false, disclaimers will not be reported.
-private static final int displayMode = 2; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
+private static final int displayMode = 1; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
 private static final boolean keepSymbol = true; //If true, all displayModes will replace saying "3.14159265358979323" with "π".
 private static final String[] wakeWords = {"whatis","calculate"};
 // -----------------------------------------------------------------------
@@ -83,13 +84,15 @@ can be done.
 2.) Without 0+, n1/n1
 3.) /0, this cannot be fixed, I believe somehting is processed before I have access to it.
 4.) n1"teen" (ex thirteen), even after extensive testing. Please use "threeteen", "thir teen", "3teen", or "13".
+5.) Negitive pi, (0-pi) still works though. Something avout "negpi" or negitive pi thows off the proccesser and I have done everything in my power of fix it.
+6.) ni^0 does not work, you need 0+ first for some reason.
 
 Please contact me if you know what is crashing SEPIA before I can view the string in these cases. I am shure this is not an intended feature of whater pre-proccesing SEPIA does.
 
 Other features that have not been included (ether I have been unable to find the source or have spent way too many hours that I will never get back)
-- Negitive pi does not presently work
 - n1 to the n2th power dosen't but n1 to the power of n2 works
 - n1 ^ 0 does not work because of proccessing with BigDouble, you should know this always returns 1 though.
+- When writing combinations of large numbers (ty,hundred,thousand,etc) if they contain smaller demonations (eg three thousand one), this program will incorectly identify them. This is why displayMode will show you what was realy caulacted. Just type 3001
 
 
 */
@@ -221,7 +224,7 @@ Other features that have not been included (ether I have been unable to find the
 			Card card = new Card(Card.TYPE_SINGLE);
 			JSONObject linkCard = card.addElement(
 					ElementType.link, 
-					JSON.make("title", "Basic Math Documentation" + ":", "desc", "By 42null"),
+					JSON.make("title", "BasicMath Documentation" + ":", "desc", "By 42null"),
 					null, null, "", 
 					"https://github.com/42null/42null-SEPIA-Extensions/blob/master/README.md", 
 					"https://sepia-framework.github.io/img/icon.png", 
@@ -288,6 +291,7 @@ Other features that have not been included (ether I have been unable to find the
 			input = input.replaceAll(" ","");
 			String extracted = removeUnwanted(/*"0plus"+*/input+" ");// ' ' required to add ending seperation
 			// if(true){return extracted;}
+			// #SpecialPages;
 			if(extracted.equals("")){
 				return "removeUnwanted(input+' ') returned an empty string";
 			}else if(extracted.equals("--help")){
@@ -526,20 +530,24 @@ Other features that have not been included (ether I have been unable to find the
 		
 		public String recreateInput(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_){
 			String returnThis_ = "";
-			int currentOperator_ = -1;
+			int currentOperator_ = 10;
+			char addThisArray_[] = {' ',' ','+','-','✕','÷','^','(',')','!'};
 
-			for(int i= 0; i < itemArrayMeta_.size(); i++){//TODO: Switch from else if to an array search through?
+			for(int i= 0; i < itemArrayMeta_.size(); i++){
 				currentOperator_ = itemArrayMeta_.get(i);
 				if(currentOperator_ == 1){
 					returnThis_+=numberArray_.get(i)+"";}
-				else if(currentOperator_ == 2){returnThis_+="+";}
-				else if(currentOperator_ == 3){returnThis_+="-";}
-				else if(currentOperator_ == 4){returnThis_+="✕";}
-				else if(currentOperator_ == 5){returnThis_+="÷";}
-				else if(currentOperator_ == 6){returnThis_+="^";}
-				else if(currentOperator_ == 7){returnThis_+="(";}
-				else if(currentOperator_ == 8){returnThis_+=")";}
-				else if(currentOperator_ == 9){returnThis_+="f";}//!
+				else if(currentOperator_ <= 9){
+					returnThis_+=addThisArray_[currentOperator_];
+				}
+				// else if(currentOperator_ == 2){returnThis_+="+";}
+				// else if(currentOperator_ == 3){returnThis_+="-";}
+				// else if(currentOperator_ == 4){returnThis_+="✕";}
+				// else if(currentOperator_ == 5){returnThis_+="÷";}
+				// else if(currentOperator_ == 6){returnThis_+="^";}
+				// else if(currentOperator_ == 7){returnThis_+="(";}
+				// else if(currentOperator_ == 8){returnThis_+=")";}
+				// else if(currentOperator_ == 9){returnThis_+="f";}//!
 				else{returnThis_ = " There has been an error at recreateInput";} // ' ' is for automatic removal
 			}
 			return returnThis_.substring(1,returnThis_.length()-1);
@@ -796,11 +804,11 @@ Other features that have not been included (ether I have been unable to find the
 						presentNumber_ = presentNumber_.divide(currentNum_,mc_);
 						// debugDouble /= currentNum_;
 					}else if(lastMeta_ == 6){
-						if(currentNum_.intValue() == 0){//Not working
-							presentNumber_ = new BigDecimal("1");
-						}else{
+						// if(currentNum_.intValue() == 0){//Not working for ^ 0
+						// 	presentNumber_ = new BigDecimal("1");
+						// }else{
 							presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
-						}
+						// }
 					}
 				/*}else{*/ //If an operator
 				}else if(currentMeta_ == 9){ //factorial
@@ -823,7 +831,7 @@ Other features that have not been included (ether I have been unable to find the
 		public static String returnHelp(){
 			String returnThis_;
 			returnThis_ =  "--{:Help Page:}-- ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ";// \n
-			returnThis_ += "Simplemath is a sdk extenson that uses the 'Whatis' or 'caulacate' command to solve math problems. It can currently addition, subtraction, multiplication, division, whole powers, negitive numbers, pi, parenthesies, order of operations, spelled out numbers and more, this extension is still under construction.";// It uses no external API's";
+			returnThis_ += "BasicMath is a SDK extenson that uses the 'Whatis', 'Caulacate', or other custom commands to solve and return answers to simple math problems. An extensive documentation at https://github.com/42null/42null-SEPIA-Extensions has been created. Make shure you are viewing the correct version. To see which version you are on run 'Whatis version'. If you are having problems with BasicMath crashing, check line #71";
 			return returnThis_;
 		}
 
@@ -888,7 +896,8 @@ Other features that have not been included (ether I have been unable to find the
 			input_ = input_.replaceAll("subtacts", "-");
 
 			input_ = input_.replaceAll("pow", "^");
-			// input_ = input_.replaceAll("*", "✕");
+			input_ = input_.replaceAll("\\*", "✕");
+			input_ = input_.replaceAll("\\!", "f");
 			// input_ = input_.replaceAll("\\b(!)\\b", "f");
 			// input_ = input_.replaceAll("\\b(*)\\b", "✕");
 
@@ -898,12 +907,11 @@ Other features that have not been included (ether I have been unable to find the
 			input_ = input_.replaceAll("squared","^2");
 			input_ = input_.replaceAll("cubed","^3");
 			// input_ = input_.replaceAll("\\b(point|dot)\\b", "ź");// "∙"
-			input_ = input_.replaceAll("point","ź");
-			input_ = input_.replaceAll("dot","ź");
-
-			// TODO: Find a way to replaceAll point to ".", the . is haveing problems and I have spent way to long on it			
+			input_ = input_.replaceAll("point","\\.");
+			input_ = input_.replaceAll("dot","\\.");
 
 // FILLER/SPACER WORDS
+			input_ = input_.replaceAll(",", "");
 			input_ = input_.replaceAll("by", "");
 			input_ = input_.replaceAll("to", "");
 			input_ = input_.replaceAll("of", "");
@@ -914,25 +922,25 @@ Other features that have not been included (ether I have been unable to find the
 			input_ = input_.replaceAll("er", ""); //(For power)
 			
 
-			while(input_.contains("ź")){
-				String tempInputA_;
-				String tempInputB_;	
-				for(int i = 0; i < input_.length(); i++){
-					if(input_.charAt(i) == 'ź'){
-						// if(input_.charAt(i-1) == ' '){
-						// 	tempInputA_ = (input_.substring(0,i-1))+".";
-						// }else{
-						// 	tempInputA_ = (input_.substring(0,i))+".";
-						// }
-						// if(input_.charAt(i+1) == ' '){
-						// 	tempInputB_ = input_.substring(i+2,input_.length()-1);
-						// }else{
-						// 	tempInputB_ = input_.substring(i+1,input_.length()-1);
-						// }
-						input_ = (input_.substring(0,i))+"."+input_.substring(i+1,input_.length());
-						// tempInputB_ = input_.substring(i+1,input_.length()-1);
-						// input_ = tempInputA_ + tempInputB_;
-			}	}	}
+			// while(input_.contains("ź")){
+			// 	String tempInputA_;
+			// 	String tempInputB_;	
+			// 	for(int i = 0; i < input_.length(); i++){
+			// 		if(input_.charAt(i) == 'ź'){
+			// 			// if(input_.charAt(i-1) == ' '){
+			// 			// 	tempInputA_ = (input_.substring(0,i-1))+".";
+			// 			// }else{
+			// 			// 	tempInputA_ = (input_.substring(0,i))+".";
+			// 			// }
+			// 			// if(input_.charAt(i+1) == ' '){
+			// 			// 	tempInputB_ = input_.substring(i+2,input_.length()-1);
+			// 			// }else{
+			// 			// 	tempInputB_ = input_.substring(i+1,input_.length()-1);
+			// 			// }
+			// 			input_ = (input_.substring(0,i))+"."+input_.substring(i+1,input_.length());
+			// 			// tempInputB_ = input_.substring(i+1,input_.length()-1);
+			// 			// input_ = tempInputA_ + tempInputB_;
+			// }	}	}
 			// input_+="ttt";
 			// input_ = input_.replaceAll(" ","");
 			return input_;
@@ -992,10 +1000,17 @@ Other features that have not been included (ether I have been unable to find the
 			}
 
 			// input_ = input_.replaceAll("zero","0");
-			
+			char nextPlace_;// = ' ';
 			String simpleStringsTy[][] = {{"twen","2"},{"thir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"thousand","000"},{"million","000000"},{"billion","000000000"},{"trillion","000000000000"}};
 			for(int i = 0; i < simpleStringsTy.length; i++){
 				input_ = input_.replaceAll(simpleStringsTy[i][0],simpleStringsTy[i][1]);//(?i)
+				// while(input_.contains("j")){
+				// 	// nextPlace_ = );
+				// 	if("1234567890".contains(input_.charAt(input_.indexOf("j")+2)+"")){
+
+				// 	}
+				// 	// 300j0j0five
+				// }
 			}
 
 			while(input_.contains("teen")){
