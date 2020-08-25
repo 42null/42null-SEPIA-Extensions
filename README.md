@@ -1,12 +1,12 @@
 # 42null-SEPIA-Extensions
-This is my repository for the SEPIA framework extensions that I have written. I am so glad to have found a java based local processing voice assistant I would love to contrubute in the only way I know how.
+This is my repository for the SEPIA framework extensions that I have written. I am so glad to have found a Java based local processing voice assistant I would love to contrubute in the only way I know how.
 
 <p><b>In Progress Extensions</b>
 <ul>
 <li><b>Basic Math:</b> A basic math extension that works offline without insted of attempting to conduct a web search.</li>
     <li><b>Abilities/Other info:</b><i>Untill the first pull request version is out, please read the release/commit notes or tell your assistant "Whatis/Calculate help" for more infromation.</i></li>
       <ol><b>Usage:</b>
-        <li>The operators +−✕*/÷^ work as well as their spelled out counterparts work in this program. However due to bigDecimal, only whole numbers can be expodents.</li>
+        <li>The operators +−✕*/÷^ work as well as their spelled out counterparts work in this program. However due to bigDecimal, only whole numbers will be used as expodents.</li>
         <li>Parenthesis "(" and ")" are supported and work as expected.</li>
         <li>Order of operations are supported and work as expected.</li>
         <li>The operator '*' or '!' does not presently work with this program. See past 
@@ -25,7 +25,7 @@ SpecialPages: Add one of the following to be returned a non-caulaction responce.
  - "Version" for version info.
  - "Pi" for info on π.
  - "Test" for a test page
- - "Debug" Not qwite a SpecialPage but is diffrent.
+ - "Debug" Not quite a SpecialPage but is diffrent.
 
 <hr size="2">
 <p><b>Contact:</b> Feel free to email me at <i>averyparanoiduser@gmail.com</i>. I would love any feedback, questions, concerns, or conversation.</p>
