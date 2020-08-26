@@ -10,7 +10,7 @@ This is my repository for the SEPIA framework extensions that I have written. I 
         <li>Parenthesis "(" and ")" are supported and work as expected.</li>
         <li>Order of operations are supported and work as expected.</li>
         <li>The operator '*' or '!' does not presently work with this program. See past 
-<a href="https://github.com/42null/42null-SEPIA-Extensions/commit/e32e8180075e8335b8565f68b184c61a82f01af7" target="_blank">version</a>s for details.</li>
+<a href="https://github.com/42null/42null-SEPIA-Extensions/commit/e32e8180075e8335b8565f68b184c61a82f01af7" target="_blank">version</a>s for details or #allowAstric.</li>
         <li>Factorial is not supported unless 'expermentalMode' is enabled (use "f" as the operator),<i> this may not always work as intended</i>.</li>
         <li>For π you can copy and paste this symbol or use "pi", for point you can put a period, say "point" or "dot".</li>
         <li>Decimals as well as saying "negitive" or just "neg" before a number works. For refrence negitive is "−", while minus is "-".</li>
