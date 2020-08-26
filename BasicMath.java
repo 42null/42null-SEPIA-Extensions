@@ -46,8 +46,8 @@ import java.math.*;
  * @dateInstalled: 
  * @commitID: 
  * 
- * @versionName: 
- * @version #0.02.09.0
+ * @versionName: PullRequest1aCleaned
+ * @version #1.02.09.1 //First '1' is for the version submitted for a pull request onto the official SEPIA. Future versions will go up in order but if not submited will contain a '0' instead.
  * 
  * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "Whatis help"
  */
@@ -55,8 +55,8 @@ import java.math.*;
 public class BasicMath implements ServiceInterface {
 	
 private static final String CMD_NAME = "basic_math";
-private static final String versionName = "PullRequest1aVersionUncleaned";
-private static final String versionNumber = "0.02.09.0";
+private static final String versionName = "PullRequest1aCleaned";
+private static final String versionNumber = "0.02.09.1";
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false; //This controls if this extension should be avaiable for all users.
@@ -101,14 +101,9 @@ Other features that have not been included (ether I have been unable to find the
 	@Override
 	public TreeSet<String> getSampleSentences(String lang) {
 		TreeSet<String> samples = new TreeSet<>();
-		//GERMAN
-		// if (lang.equals(Language.DE.toValue())){
-		// //OTHER
-		// }else{
 			samples.add("Whatis help");
 			samples.add("Whatis version");
 			samples.add("Whatis neg 5.43331 times (nineteen / forty seven point nine 7) plus (0 - pi) to the power of neg four?");
-		// }
 		return samples;
 	}
 	
@@ -131,11 +126,9 @@ Other features that have not been included (ether I have been unable to find the
 								
 				.addAnswer(okAnswer, 0, "Sorry there has been an error @okAnswer")
 				.addAnswer(askFirstNumber, 0, "Sorry, it appears that you did not enter any operators, could you please add some?")
-						// Answer.Character.neutral, 2, 5))
 				.addAnswer(new Answer(Language.from(language), askFirstNumber, "Sorry I did not understand your first number,"
 								+ "Could you tell me once more please?", 
 				Answer.Character.neutral, 2, 5))
-						//example of how to use the 'complete' answer object
 				;
 			return answerPool;
 		
@@ -159,14 +152,12 @@ Other features that have not been included (ether I have been unable to find the
 		if(makePublic){
 			info.makePublic();
 		}
+
 		//Command
 		info.setIntendedCommand(Sdk.getMyCommandName(this, CMD_NAME));
 		
 		//Direct-match trigger sentences in different languages:
 		String EN = Language.EN.toValue();
-		/*info.setCustomTriggerRegX(".*\\b("
-					+ "(|caulacate)\\b.* (+|-|/|^)"
-				+ ")\\b.*", EN);*/
 
 		String tempString = "";
 		for(int i = 0; i < wakeWords.length; i++){
@@ -178,22 +169,19 @@ Other features that have not been included (ether I have been unable to find the
 		info.setCustomTriggerRegXscoreBoost(10);		//boost service a bit to increase priority over similar ones
 		
 		//Parameters:
-		//Required parameters will be asked automatically by SEPIA using the defined question.
 		
 		Parameter p1 = new Parameter(new GetFirstNumber())
 				.setRequired(true)
 				.setQuestion(askFirstNumber);
 		
-		info.addParameter(p1);//.addParameter(p2).addParameter(p3);
+		info.addParameter(p1);
 		
 		//Answers (these are the default answers, you can trigger a custom answer at any point in the module 
 		info.addSuccessAnswer(successAnswer)
 			.addFailAnswer(failAnswer)
 			.addOkayAnswer(okAnswer);
 		
-		//Add answer parameters that are used to replace <1>, <2>, ... in your answers.
-		info.addAnswerParameters("firstNumber");//, "number", "name"); 	//<1>=time, <2>=number, ...
-		
+		info.addAnswerParameters("firstNumber");
 		return info;
 	}
 	
@@ -206,7 +194,6 @@ Other features that have not been included (ether I have been unable to find the
 		
 		//get required parameters:
 		
-		//-name - NOTE: custom parameter has different naming
 		Parameter nameParameter = nluResult.getRequiredParameter(GetFirstNumber.class.getName());
 		String firstNumber = nameParameter.getValueAsString();
 		
@@ -231,9 +218,6 @@ Other features that have not been included (ether I have been unable to find the
 			JSON.put(linkCard, "imageBackground", "#000");	//more options like CSS background
 			api.addCard(card.getJSON());
 		}else if((firstNumber).contains("getting version info...")){
-			// api.addAction(ACTIONS.BUTTON_IN_APP_BROWSER);
-			// api.putActionInfo("url", "https://github.com/42null/42null-SEPIA-Extensions");
-			// api.putActionInfo("title", "Homepage");
 			
 			Card card = new Card(Card.TYPE_SINGLE);
 			JSONObject linkCard = card.addElement(
@@ -244,7 +228,7 @@ Other features that have not been included (ether I have been unable to find the
 					"https://sepia-framework.github.io/img/icon.png", 
 					null, null
 			);
-			JSON.put(linkCard, "imageBackground", "#000"/*999*/);	//more options like CSS background
+			JSON.put(linkCard, "imageBackground", "#000");
 			api.addCard(card.getJSON());
 		}
 
@@ -262,9 +246,9 @@ Other features that have not been included (ether I have been unable to find the
 	 * Parameter handler that tries to extract a reservation name.
 	 */
 	public static class GetFirstNumber extends CustomParameter {
-		boolean debugMode = false; //TODO: Include a operator in input, also, should their be a int and then we could have difrent modes? 
+		boolean debugMode = false;
 		String debugStr = "";
-		char dontUseMeChar = 'j';//TODO: Add a detection to check if this character is used, is this realy nessery though?
+		char dontUseMeChar = 'j';
 		String dontUseMeStr = "j";
 
 // Moved to be more global
@@ -308,7 +292,6 @@ Other features that have not been included (ether I have been unable to find the
 			if(extracted.equals("(π) ")){// Special Case
 				return "π would be 3.14159265358979323, for more digits see https://www.piday.org/million/.";
 			}
-			// if(true){return ">"+extracted+"<";}
 
 			if(extracted.indexOf("+")==-1&&extracted.indexOf("-")==-1&&extracted.indexOf("^")==-1&&extracted.indexOf("✕")==-1&&extracted.indexOf("÷")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(")")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(/*"\\b(!)\\b"*/"f")==-1){
 				if(allowAstric){
@@ -333,7 +316,6 @@ Other features that have not been included (ether I have been unable to find the
 				boolean canAdd = false;
 				BigDecimal intermideate_;
 				String recreated_;
-				// Boolean whileRan_ = false;
 				extracted = extracted.replaceAll("zero","0");  //Last ditch resort
 				extracted = extracted.replaceAll("−π","(0-π)");//Last ditch resort
 				extracted = "("+extracted+")"+dontUseMeStr;
@@ -384,31 +366,19 @@ Other features that have not been included (ether I have been unable to find the
 						itemArrayMeta.add(1); //Number
 						numberArray.add(new BigDecimal("3.14159265358979323"));//846
 						currentItem_ = "";
-					// }else if(currentChar_ == '−' && (extracted.charAt(i+1) == 'π')){	//Sepcial number case (neg pi)
-					// 	notANumber = false;
-					// 	itemArrayMeta.add(1); //Number
-					// 	numberArray.add(new BigDecimal("3.14159265358979323"));//846
-					// 	// extracted = extracted.substring(0,i-1)+extracted.substring(i+1,extracted.length());
-					// 	extracted = extracted.replaceAll("π","");
-					// 	currentItem_ = "";
-					// 	// return extracted;
+
 					}else if(currentChar_ == '_' && expermentalMode){ //Special case - out of order powers
 						notANumber = false;
-						// 2_4^
-						// 2^4
 						itemArrayMeta.add(1); //Number
 						numberArray.add(new BigDecimal(Double.parseDouble(currentItem_.substring(0,currentItem_.length()-2))+""));
 						extracted = extracted.replaceFirst("^","");
 						extracted = extracted.replaceFirst("_","^");
-						// extracted = extracted.substring(0,i)+"^"+extracted.charAt(i+1)+extracted.substring(0,i);
 						currentItem_ = "";
-						// return extracted;
 					}else{
 						notANumber = false;
 					}
 					
 					if(notANumber){
-						// intermideate_ = new BigDecimal(Double.parseDouble(currentItem_)+"");
 						numberArray.add(null);
 					}else{
 						notANumber = true;
@@ -416,20 +386,11 @@ Other features that have not been included (ether I have been unable to find the
 
 				}
 				extracted = removePlace(extracted,-1,true); //extracted.length()-1); //-1 for last space
-				// extracted = extracted.substring(0,extracted.length()-1);
 
 	
 				if(numberArray.size() == 0){
 					return "";
 				}
-				// debugStr = itemArrayMeta+"";
-// ItemArayMeta: 0 = unknown/error, 1 = number, 2 = operator (includes parenthesies),
-// operatorArray: 0 = unknown/error, + = 1, - = 2, ✕ = 3, ÷ = 4, ^ = 5
-					
-					// itemArrayMeta.add(1,1);
-					// numberArray.add(1,new BigDecimal("0"));
-					// itemArrayMeta.add(2,2);
-					// numberArray.add(2,null);
 
 					if(displayMode == 2){//For Fancy
 						addInMultiplication();
@@ -446,17 +407,6 @@ Other features that have not been included (ether I have been unable to find the
 						recreated_ = recreateInput(collectedItemArrayMeta_,collectedNumberArray_);
 					}
 
-					// for(int i = 0; i < itemArrayMeta.size();i++){
-					// 	// if(numberArray.get(i).compareTo(new BigDecimal(3.14159265358979323))==0){
-					// 	if((numberArray.get(i)+"").equals(""+(new BigDecimal(3.14159265358979323)))){
-					// 		// itemArrayMeta.add(i+1,8);
-					// 		// itemArrayMeta.add(i,7);
-					// 		// numberArray.add(i+1,null);
-					// 		// numberArray.add(i,null);
-					// 	}
-					// }
-
-					// removeSingularSections();
 					addInMultiplication();
 					orderOfOperations();
 					itemArrayMeta.add(0,7);
@@ -469,11 +419,9 @@ Other features that have not been included (ether I have been unable to find the
 					//END -DEBUG
 					while(itemArrayMeta.contains(2)||itemArrayMeta.contains(3)||itemArrayMeta.contains(4)||itemArrayMeta.contains(5)||itemArrayMeta.contains(6)||itemArrayMeta.contains(9)){
 						caulactedNumber = splitAndConquer();
-						orderOfOperations();//Is this nessery?
+						orderOfOperations();
 					}
 					
-
-	// Include?
 				// String returnThis_ = "";
 				// if(false){ returnThis_ += "["+extracted+"] ";}
 				// if(false){  returnThis_ += "itemArrayMeta: ["+itemArrayMeta+"] ";}
@@ -482,11 +430,8 @@ Other features that have not been included (ether I have been unable to find the
 				// if(false){  returnThis_ += "debugDouble: ["+debugDouble+"] ";}
 				// if(false){ returnThis_ += "debugStr: ["+debugStr+"] ";}
 
-	// Remove .0 artificat from caulactedNumber: Cannot get index of "."
 				String caulactedNumberStr = caulactedNumber+"";
-				// if((caulactedNumber.doubleValue() % 1) == 0 && !(caulactedNumberStr.contains("E+")) && caulactedNumberStr.contains("\\.")){
-				// 	caulactedNumberStr = caulactedNumberStr.substring(0,caulactedNumberStr.indexOf("\\."));
-				// }
+
 // Start Disclaimers
 				if(doDisclaimers){
 					if(disclaimerPi){
@@ -501,7 +446,6 @@ Other features that have not been included (ether I have been unable to find the
 				if(keepSymbol){//Convert 3.14159265358979323 to pi
 					recreated_ = recreated_.replaceAll("3.14159265358979323","π");
 				}
-				// recreated_ = recreated_.replaceAll("\\(π)","π");//This does not work because of the usage of ( and )
 // End Cleanup recreated_ with pi
 
 				if(debugMode){
@@ -542,19 +486,10 @@ Other features that have not been included (ether I have been unable to find the
 				else if(currentOperator_ <= 9){
 					returnThis_+=addThisArray_[currentOperator_];
 				}
-				// else if(currentOperator_ == 2){returnThis_+="+";}
-				// else if(currentOperator_ == 3){returnThis_+="-";}
-				// else if(currentOperator_ == 4){returnThis_+="✕";}
-				// else if(currentOperator_ == 5){returnThis_+="÷";}
-				// else if(currentOperator_ == 6){returnThis_+="^";}
-				// else if(currentOperator_ == 7){returnThis_+="(";}
-				// else if(currentOperator_ == 8){returnThis_+=")";}
-				// else if(currentOperator_ == 9){returnThis_+="f";}//!
 				else{returnThis_ = " There has been an error at recreateInput";} // ' ' is for automatic removal
 			}
 			return returnThis_.substring(1,returnThis_.length()-1);
 		}
-
 
 		public void addInMultiplication(){
 			for(int i = 1; i < itemArrayMeta.size()-1; i++){
@@ -564,85 +499,6 @@ Other features that have not been included (ether I have been unable to find the
 					i++;
 				}
 			}
-		}
-
-		// 1 6 1 
-		// 2 n 3 
-
-		// public void fixOutOfPlacePowers(){
-		// 	for(int i = 1; i < itemArrayMeta.size()-1; i++){
-		// 		if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i+1)==1 && itemArrayMeta.get(i+2)==6){
-		// 			itemArrayMeta.remove(i+2);
-		// 			itemArrayMeta.add(i+1, 6); // ^
-		// 			numberArray.remove(i+2);
-		// 			numberArray.add(i+1,null);
-		// 			i = 1;//TODO: Can I make this more efficent?
-		// 		}
-		// 	}
-		// }
-
-		// public void removeSingularSections(){
-		// 	if(true){return;}
-		// 	for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if i first?
-		// 		// if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
-		// 		if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
-		// 			itemArrayMeta.remove(i+2);
-		// 			itemArrayMeta.remove(i-1);
-		// 			numberArray.remove(i+2);
-		// 			numberArray.remove(i-1);
-		// 			i = 1;//TODO: Can I make this more efficent?
-		// 		}
-		// 	}
-		// }
-		
-		// public void removeSingularSections(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_){
-			// for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if "i" first?
-			// 	if(itemArrayMeta_.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
-			// 		itemArrayMeta_.remove(i+2);
-			// 		itemArrayMeta_.remove(i-1);
-			// 		numberArray_.remove(i+2);
-			// 		numberArray_.remove(i-1);
-			// 		i = 1;//TODO: Can I make this more efficent?
-			// 	}
-			// }
-			/*
-			int timesOccured = 0;
-			int firstOccurenceLocation = -1;
-
-			// for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if "i" first?
-			// 	if(itemArrayMeta_.get(i)==7 && itemArrayMeta_.get(i+1)==7){//Make more efficent - indexOf()?
-			// 		firstOccurenceLocation = i;
-			// 		i = 1;//TODO: Can I make this more efficent?
-			// 	}else if(itemArrayMeta_.get(i)==8 && itemArrayMeta_.get(i+1)==8){
-			// 		if(i != -1){
-
-			// 		}
-			// 	}else if(itemArrayMeta_.get(i)==8 && itemArrayMeta_.get(i+1)!=8){
-			// 		firstOccurenceLocation = -1;
-			// 	}
-			// }
-//FUTURE: Note, if the number array grows and numbers above 9 are used, this code will need to be updated
-			String stringyItems_ = (itemArrayMeta_+"").replaceAll(",","");
-			stringyItems_ = stringyItems_.substring(1,stringyItems_.length()-1);
-			int openPartPlace_ = stringyItems_.indexOf("77");
-			while(stringyItems_.charAt(openPartPlace_+1)==7){
-				openPartPlace_++;
-			}
-			int shutPartPlace_ = stringyItems_.indexOf("88");
-			String subString_;
-			while(openPartPlace_!=-1 && shutPartPlace_!=1){
-				subString_ = stringyItems_.substring(openPartPlace_+1,shutPartPlace_);
-				if(hasOf(subString_,"7") == hasOf(subString_,"8")){
-					stringyItems_ = subString_;
-					numberArray_ = new ArrayList<BigDecimal>(numberArray_.subList(openPartPlace_,shutPartPlace_+1));
-				}
-			}
-*/
-		// }
-
-		// Is not used but it is nice to have
-		public int hasOf(String main_,String minor_){
-			return main_.length()-main_.replaceAll(minor_, "").length();
 		}
 
 		public void orderOfOperations(){
@@ -660,7 +516,7 @@ Other features that have not been included (ether I have been unable to find the
 			int currentOperatorNum_;
 			if(expermentalMode){
 				currentOperatorNum_ = 9;
-				// SPECIAL CASE: factorial //TODO: merge into one again?
+				// SPECIAL CASE: factorial
 				for(int i = 0; i < itemArrayMeta.size(); i++){
 					currentMeta_ = itemArrayMeta.get(i);
 					innerGo_ = true;
@@ -770,54 +626,36 @@ Other features that have not been included (ether I have been unable to find the
 			return doMath(itemArrayMeta_, numberArray_, closestItemMetaA_);
 		}
 
-		public BigDecimal /*boolean*/ doMath(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_, int locationTakenFrom_){
-			// str7 += "*"+itemArrayMeta_+""+numberArray_+"*";
+		public BigDecimal doMath(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_, int locationTakenFrom_){
 			BigDecimal presentNumber_ = numberArray_.get(0);
 			BigDecimal currentNum_ = new BigDecimal("0");
-			// BigDecimal lastNum_;
 			int currentOperator_ = -1;
 			int currentMeta_ =-1;
 			int lastMeta_ = -1;
 			int operatorArrayPlace_ = 0;
-			MathContext mc_ = new MathContext(18);//longestValueLength(numberArray)-1);
+			MathContext mc_ = new MathContext(18);
 			for(int i = 0; i < itemArrayMeta_.size();i++){
 				currentMeta_ = itemArrayMeta_.get(i);
 
-				/*if(currentMeta_ == lastMeta_){
-					// return "You cannot have two numbers in sequence without an operator";
-		}else*/ if(currentMeta_ == 1){//If a number
-					// if(currentNum_ = null){
-					// 	return "You need an operator";}
-					currentNum_ = numberArray_.get(i);
+					if(currentMeta_ == 1){//If a number
+						currentNum_ = numberArray_.get(i);
 					if(currentNum_ == null){
-						// return "there was a problem";
 					}
-					// 2+2f+0
-					// 121921
-					if(lastMeta_ == 2 /*currentOperator_== 1*/){
+
+					if(lastMeta_ == 2){
 						presentNumber_ = presentNumber_.add(currentNum_,mc_);
 					}else if(lastMeta_ == 3){
 						presentNumber_ = presentNumber_.subtract(currentNum_,mc_);
-						// debugDouble -= currentNum_;
 					}else if(lastMeta_ == 4){
 						presentNumber_ = presentNumber_.multiply(currentNum_,mc_);
-						// debugDouble *= currentNum_;
 					}else if(lastMeta_ == 5){
 						presentNumber_ = presentNumber_.divide(currentNum_,mc_);
-						// debugDouble /= currentNum_;
 					}else if(lastMeta_ == 6){
-						// if(currentNum_.intValue() == 0){//Not working for ^ 0
-						// 	presentNumber_ = new BigDecimal("1");
-						// }else{
-							presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
-						// }
+						presentNumber_ = presentNumber_.pow(currentNum_.intValue(),mc_);
 					}
-				/*}else{*/ //If an operator
 				}else if(currentMeta_ == 9){ //factorial
 					for(int j = currentNum_.intValue()-1; j > 1; j--){
 						presentNumber_ = presentNumber_.multiply(new BigDecimal(j),mc_);
-						// str7 += "*"+presentNumber_+"*";
-						// str7 += ":"+(presentNumber_.multiply(new BigDecimal(j),mc_)+":");
 					}
 				}
 				lastMeta_ = currentMeta_;
@@ -832,7 +670,7 @@ Other features that have not been included (ether I have been unable to find the
 
 		public static String returnHelp(){
 			String returnThis_;
-			returnThis_ =  "--{:Help Page:}-- ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ";// \n
+			returnThis_ =  "--{:Help Page:}-- ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ";
 			returnThis_ += "BasicMath is a SDK extenson that uses the 'Whatis', 'Caulacate', or other custom commands to solve and return answers to simple math problems. An extensive documentation at https://github.com/42null/42null-SEPIA-Extensions has been created. Make shure you are viewing the correct version. To see which version you are on run 'Whatis version'. If you are having problems with BasicMath crashing, check line #71";
 			return returnThis_;
 		}
@@ -858,9 +696,7 @@ Other features that have not been included (ether I have been unable to find the
 		}
 
 		public String removeUnwanted(String input_){
-			// if(true){return input_;}
 			input_ = input_.toLowerCase();
-
 			if(input_.contains("help")){
 				return "--help";
 			}else if(input_.contains("debug")){
@@ -870,13 +706,9 @@ Other features that have not been included (ether I have been unable to find the
 
 // "Wake" words
 			String tempString_="";
-			for(int i = wakeWords.length-1; i >= 0; i--){//Keep with '>='? (trying to keep it as lightweight on processing as possable)
-				// tempString_ += wakeWords[i]+"|";
+			for(int i = wakeWords.length-1; i >= 0; i--){
 				input_ = input_.replaceAll(wakeWords[i], "");
 			}
-			// tempString_ = tempString_.substring(0,tempString_.length()-2);//Not useing removeLast or removeSpace to save on processing resources
-			// input_ = input_.replaceAll("\\b("+tempString_+")\\b", "");
-
 			input_ = input_.replaceAll("eighty","80"); //For problems with eighty //TOD: Find a better solution to this problem
 
 // String to num converter
@@ -886,13 +718,13 @@ Other features that have not been included (ether I have been unable to find the
 // OPERATORS
 			input_ = input_.replaceAll("multiplied", "✕");
 			input_ = input_.replaceAll("times", "✕");
+
 			input_ = input_.replaceAll("divided", "÷");
 			input_ = input_.replaceAll("/", "÷");
-			// input_ = input_.replaceAll("\\b(plus|added)\\b", "+");
+
 			input_ = input_.replaceAll("plus", "+");
 			input_ = input_.replaceAll("added", "+");
-			
-			// input_ = input_.replaceAll("\\b(minus|subtracted|subtacts)\\b", "-");
+
 			input_ = input_.replaceAll("minus", "-");
 			input_ = input_.replaceAll("subtracted", "-");
 			input_ = input_.replaceAll("subtacts", "-");
@@ -904,15 +736,12 @@ Other features that have not been included (ether I have been unable to find the
 					input_ = input_.substring(0, i)+"✕"+input_.substring(i+1);}
 			}}
 			input_ = input_.replaceAll("\\!", "f");
-			// input_ = input_.replaceAll("\\b(!)\\b", "f");
-			// input_ = input_.replaceAll("\\b(*)\\b", "✕");
 
 // SPECIAL CASES
 			input_ = input_.replaceAll("neg","−");//−");
 			input_ = input_.replaceAll("pi","(π)");//3.14159265358979323846
 			input_ = input_.replaceAll("squared","^2");
 			input_ = input_.replaceAll("cubed","^3");
-			// input_ = input_.replaceAll("\\b(point|dot)\\b", "ź");// "∙"
 			input_ = input_.replaceAll("point","\\.");
 			input_ = input_.replaceAll("dot","\\.");
 
@@ -927,32 +756,10 @@ Other features that have not been included (ether I have been unable to find the
 			input_ = input_.replaceAll("itive", ""); //(For negitive)
 			input_ = input_.replaceAll("er", ""); //(For power)
 			
-
-			// while(input_.contains("ź")){
-			// 	String tempInputA_;
-			// 	String tempInputB_;	
-			// 	for(int i = 0; i < input_.length(); i++){
-			// 		if(input_.charAt(i) == 'ź'){
-			// 			// if(input_.charAt(i-1) == ' '){
-			// 			// 	tempInputA_ = (input_.substring(0,i-1))+".";
-			// 			// }else{
-			// 			// 	tempInputA_ = (input_.substring(0,i))+".";
-			// 			// }
-			// 			// if(input_.charAt(i+1) == ' '){
-			// 			// 	tempInputB_ = input_.substring(i+2,input_.length()-1);
-			// 			// }else{
-			// 			// 	tempInputB_ = input_.substring(i+1,input_.length()-1);
-			// 			// }
-			// 			input_ = (input_.substring(0,i))+"."+input_.substring(i+1,input_.length());
-			// 			// tempInputB_ = input_.substring(i+1,input_.length()-1);
-			// 			// input_ = tempInputA_ + tempInputB_;
-			// }	}	}
-			// input_+="ttt";
-			// input_ = input_.replaceAll(" ","");
 			return input_;
 		}
 
-		public int longestValueLength(/*Object*/ ArrayList<BigDecimal> arrayList){
+		public int longestValueLength(ArrayList<BigDecimal> arrayList){
 			int longestLength0_ = 0;
 			int longestLength1_ = 0;
 			int currentLength0_=0;
@@ -982,14 +789,8 @@ Other features that have not been included (ether I have been unable to find the
 				input_ = input_.replaceAll(simpleStrings1[i],("_"+(i+1)));
 			}
 
-			// input_ = input_.replaceAll(simpleStrings2[i],i+"");
-			// String simpleStrings[][] = {{"zero","0"},{"one","1("},{"two","2"},{"three","3"},{"four","4"},{"",""}};
-			// input_ = input_.replaceAll("zero","0");
-			// input_ = "zero+fivetwo";
-			// if(true){return input_;}
 			String simpleStrings2[] = {"zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"};
 			for(int i = 0; i < simpleStrings2.length; i++){
-				// if(i==0){input_ = input_.replaceAll("zero","0");}else{
 				input_ = input_.replaceAll(simpleStrings2[i],(""+i+""));//}
 			}
 
@@ -1005,18 +806,11 @@ Other features that have not been included (ether I have been unable to find the
 				}
 			}
 
-			// input_ = input_.replaceAll("zero","0");
-			char nextPlace_;// = ' ';
+			char nextPlace_;
 			String simpleStringsTy[][] = {{"twen","2"},{"thir","3"},{"for","4"},{"fif","5"},/**/{"hundred","00"},{"thousand","000"},{"million","000000"},{"billion","000000000"},{"trillion","000000000000"}};
 			for(int i = 0; i < simpleStringsTy.length; i++){
 				input_ = input_.replaceAll(simpleStringsTy[i][0],simpleStringsTy[i][1]);//(?i)
-				// while(input_.contains("j")){
-				// 	// nextPlace_ = );
-				// 	if("1234567890".contains(input_.charAt(input_.indexOf("j")+2)+"")){
 
-				// 	}
-				// 	// 300j0j0five
-				// }
 			}
 
 			while(input_.contains("teen")){
@@ -1025,11 +819,7 @@ Other features that have not been included (ether I have been unable to find the
 				input_ = input_.replaceFirst("teen","");
 			}
 
-			// int endStop_ = input_.length() - 2;
-			// if(endStop_ < 0){
-			// 	endStop_ = 0;
-			// }
-			return input_;//.substring(0, endStop_);//Cleanup added extra spaces at the end
+			return input_;
 		}
 
 		public boolean isCharNumber(char input_){
@@ -1054,7 +844,6 @@ Other features that have not been included (ether I have been unable to find the
 			//any errors?
 			}else if (input.equals("<user_data_unresolved>")){
 				this.buildSuccess = false;
-				// return "";
 				return "Error <user_data_unresolved>"; 		//TODO: this probably should become something like 'Interview.ERROR_USER_DATA_ACCESS' in the future;
 			}else{
 				//build result with entry for field "VALUE"
