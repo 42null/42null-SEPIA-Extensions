@@ -1,4 +1,4 @@
-package net.b07z.sepia.sdk.services.uid1003;//Will need to switch to assistant user to make public to all users.
+package net.b07z.sepia.sdk.services.uid1005;//Will need to switch to assistant user to make public to all users.
 
 import java.util.TreeSet;
 
@@ -47,22 +47,21 @@ import java.math.*;
  * @commitID: 
  * 
  * @versionName: 
- * @version #0.02.08.9
+ * @version #0.02.09.0
  * 
- * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "whatis help"
+ * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "Whatis help"
  */
-
 
 public class BasicMath implements ServiceInterface {
 	
 private static final String CMD_NAME = "basic_math";
-// private static final String versionName = "PullRequest1aVersionUncleaned";
-private static final String versionName = "lastBeforeIdiotTest";
-private static final String versionNumber = "0.02.08.9";
+private static final String versionName = "PullRequest1aVersionUncleaned";
+private static final String versionNumber = "0.02.09.0";
 
 // -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 private static final boolean makePublic = false; //This controls if this extension should be avaiable for all users.
 private static final boolean expermentalMode = false; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
+private static final boolean allowAstric = false; // #allowAstric Because "\\*" does not always work to avoid confunsion set to false. Things such as "Whatis 2*2" does work for some reason though.
 private static final boolean doDisclaimers = true; //If set to false, disclaimers will not be reported.
 private static final int displayMode = 1; //Will be superseeded by debugMode, currently choose from 1-3, search for #displayMode for more infomation.
 private static final boolean keepSymbol = true; //If true, all displayModes will replace saying "3.14159265358979323" with "π".
@@ -93,7 +92,6 @@ Other features that have not been included (ether I have been unable to find the
 - n1 to the n2th power dosen't but n1 to the power of n2 works
 - n1 ^ 0 does not work because of proccessing with BigDouble, you should know this always returns 1 though.
 - When writing combinations of large numbers (ty,hundred,thousand,etc) if they contain smaller demonations (eg three thousand one), this program will incorectly identify them. This is why displayMode will show you what was realy caulacted. Just type 3001
-
 
 */
 // -----------------------------------------------------------------------
@@ -313,7 +311,11 @@ Other features that have not been included (ether I have been unable to find the
 			// if(true){return ">"+extracted+"<";}
 
 			if(extracted.indexOf("+")==-1&&extracted.indexOf("-")==-1&&extracted.indexOf("^")==-1&&extracted.indexOf("✕")==-1&&extracted.indexOf("÷")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(")")==-1&&extracted.indexOf("(")==-1&&extracted.indexOf(/*"\\b(!)\\b"*/"f")==-1){
-				return "Error: No operators detected";
+				if(allowAstric){
+					return "Error: No operators detected";
+				}else{
+					return "Error: No operators detected. If you used an astric please note that allowAstric is currently set to false.";	
+				}
 			}
 			
 			while(extracted.charAt(0) == ' ' && !(extracted.equals(""))){
@@ -437,7 +439,7 @@ Other features that have not been included (ether I have been unable to find the
 						itemArrayMeta = new ArrayList<Integer>(collectedItemArrayMeta_);
 						numberArray = new ArrayList<BigDecimal>(collectedNumberArray_);
 					}else{
-						removeSingularSections();
+						// removeSingularSections();
 						addInMultiplication();
 						collectedItemArrayMeta_ = new ArrayList<Integer>(itemArrayMeta);
 						collectedNumberArray_ = new ArrayList<BigDecimal>(numberArray);
@@ -454,7 +456,7 @@ Other features that have not been included (ether I have been unable to find the
 					// 	}
 					// }
 
-					removeSingularSections();
+					// removeSingularSections();
 					addInMultiplication();
 					orderOfOperations();
 					itemArrayMeta.add(0,7);
@@ -499,7 +501,7 @@ Other features that have not been included (ether I have been unable to find the
 				if(keepSymbol){//Convert 3.14159265358979323 to pi
 					recreated_ = recreated_.replaceAll("3.14159265358979323","π");
 				}
-				recreated_ = recreated_.replaceAll("(π)","π");//This does not work because of the usage of ( and )
+				// recreated_ = recreated_.replaceAll("\\(π)","π");//This does not work because of the usage of ( and )
 // End Cleanup recreated_ with pi
 
 				if(debugMode){
@@ -579,30 +581,30 @@ Other features that have not been included (ether I have been unable to find the
 		// 	}
 		// }
 
-		public void removeSingularSections(){
-			if(true){return;}
-			for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if i first?
-				// if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
-				if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
-					itemArrayMeta.remove(i+2);
-					itemArrayMeta.remove(i-1);
-					numberArray.remove(i+2);
-					numberArray.remove(i-1);
-					i = 1;//TODO: Can I make this more efficent?
-				}
-			}
-		}
-		
-		// public void removeSingularSections(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_){
-		// 	for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if "i" first?
-		// 		if(itemArrayMeta_.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
-		// 			itemArrayMeta_.remove(i+2);
-		// 			itemArrayMeta_.remove(i-1);
-		// 			numberArray_.remove(i+2);
-		// 			numberArray_.remove(i-1);
+		// public void removeSingularSections(){
+		// 	if(true){return;}
+		// 	for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if i first?
+		// 		// if(numberArray.size() == itemArrayMeta.size()){str7 = "yikes";}
+		// 		if(itemArrayMeta.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
+		// 			itemArrayMeta.remove(i+2);
+		// 			itemArrayMeta.remove(i-1);
+		// 			numberArray.remove(i+2);
+		// 			numberArray.remove(i-1);
 		// 			i = 1;//TODO: Can I make this more efficent?
 		// 		}
 		// 	}
+		// }
+		
+		// public void removeSingularSections(ArrayList<Integer> itemArrayMeta_, ArrayList<BigDecimal> numberArray_){
+			// for(int i = 1; i < itemArrayMeta.size()-1; i++){//Put in if "i" first?
+			// 	if(itemArrayMeta_.get(i)==1 && itemArrayMeta.get(i-1)==7 && itemArrayMeta.get(i+1)==8){
+			// 		itemArrayMeta_.remove(i+2);
+			// 		itemArrayMeta_.remove(i-1);
+			// 		numberArray_.remove(i+2);
+			// 		numberArray_.remove(i-1);
+			// 		i = 1;//TODO: Can I make this more efficent?
+			// 	}
+			// }
 			/*
 			int timesOccured = 0;
 			int firstOccurenceLocation = -1;
@@ -896,7 +898,11 @@ Other features that have not been included (ether I have been unable to find the
 			input_ = input_.replaceAll("subtacts", "-");
 
 			input_ = input_.replaceAll("pow", "^");
-			input_ = input_.replaceAll("\\*", "✕");
+			if(allowAstric){input_ = input_.replaceAll("\\*", "✕");// #allowAstric
+			for(int i = 0; i < input_.length(); i++){
+				if((input_.charAt(i) == 'x') && (input_.charAt(i-1) != 'i')){//To avoid six
+					input_ = input_.substring(0, i)+"✕"+input_.substring(i+1);}
+			}}
 			input_ = input_.replaceAll("\\!", "f");
 			// input_ = input_.replaceAll("\\b(!)\\b", "f");
 			// input_ = input_.replaceAll("\\b(*)\\b", "✕");
