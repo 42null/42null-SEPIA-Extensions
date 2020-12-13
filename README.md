@@ -1,9 +1,17 @@
 # 42null-SEPIA-Extensions
 This is my repository for the SEPIA framework extensions that I have written. I am so glad to have found a Java based local processing voice assistant I would love to contrubute in the only way I know how.
 
-<p><b>In Progress Extensions</b>
+<p><b>--Beta Extensions--</b></p>
+    <p2><b>Custom Web Search:</b> A simple search extension that generates a link to the search resaults of the webpage you would like to search.</p2>
+       <ul>
+           <li>1</li>
+       </ul>
+
+
+<p><b>--Paused Extensions--</b>
+
+<p2><b>Basic Math:</b> A basic math extension that works offline without insted of attempting to conduct a web search.</p2>
 <ul>
-<li><b>Basic Math:</b> A basic math extension that works offline without insted of attempting to conduct a web search.</li>
     <li><b>Abilities/Other info:</b><i>Untill the first pull request version is out, please read the release/commit notes or tell your assistant "Whatis/Calculate help" for more infromation.</i></li>
       <ol><b>Usage:</b>
         <li>The operators +−✕*/÷^ work as well as their spelled out counterparts work in this program. However due to bigDecimal, only whole numbers will be used as expodents.</li>
