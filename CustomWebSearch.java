@@ -61,7 +61,8 @@ public class CustomWebSearch implements ServiceInterface {
 	private static final boolean makePublic = true; //This controls if this extension should be avaiable for all users.
 	private static final boolean expermentalMode = false; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
 	private static final boolean doDisclaimers = true; //If set to false, disclaimers will not be reported.
-//	<website operator>, <starturl>, <spaces>
+	private static final boolean debugMode = false; //Enables extra outputs
+	//<website operator>, <starturl>, <spaces>
 	private static final String[][] websiteList = {//To work with '?' marks you will need to replace them wilth a #@, if you would like to change this, search and replace this string with something else
 	// Default working examples:
 	// {"!!!","negitive array posistion found","!"},
@@ -69,8 +70,8 @@ public class CustomWebSearch implements ServiceInterface {
 	//{ <Trigger word > , <url format before ending> , <space replacement operator>, <url ending format>}
 	{"youtube,","https://www.youtube.com/results#@search_query=","+", ""},//Defaut to search when not found
 	{"wikihow","https://www.wikihow.com/wikiHowTo#@search=","+",""},
-	{"wikipedia","https://en.wikipedia.org/wiki/","_",""},
-	{"duck","https://duckduckgo.com/#@q=","+","&ia=web"},//Need to do search for "?"
+	{"wikipedia","https://www.en.wikipedia.org/wiki/","_",""},
+	{"duck","https://www.duckduckgo.com/#@q=","+","&ia=web"},//Need to do search for "?"
 	{"_","_","_","_"}
 	};
 	// -----------------------------------------------------------------------
@@ -79,6 +80,7 @@ public class CustomWebSearch implements ServiceInterface {
 	- Recursive search operators; searching for the space replacements name as part of the paramater, no real reason to do this in the first place though.
 	-
 */
+
 
 	//Define some sentences for testing:
 	@Override
@@ -94,7 +96,20 @@ public class CustomWebSearch implements ServiceInterface {
 		
 		//Build English answers
 		// if (language.equals(LANGUAGES.EN)){
+		if(debugMode){
 			answerPool.addAnswer(successAnswer, 0, "CustomWebSearch Returning: '<1>'");
+		}else{
+			// answerPool.addAnswer(successAnswer, 0, "<1>");//TODO: Change to allow .substring(), want to be able to just state a link
+			String possableStatements[] = {
+			"Here you go!",
+			"Try clicking this! :D",
+			"I believe this is what you are looking for...",
+			"v V v V v V  (See Below)  V v V v V v",
+			"I don't have the answer, but this should help! :)"
+			};
+			String finishStatement_ = possableStatements[(int)(Math.random()*((possableStatements.length)))];
+			answerPool.addAnswer(successAnswer, 0, finishStatement_);//TODO: Change to allow .substring(), want to be able to just state a link
+		}
 			// answerPool.addAnswer(successAnswer, 0, "CustomWebSearch responds with...");
 			// answerPool.addAnswer(successAnswer, 0, "CustomWebSearch says...");
 			answerPool
@@ -204,6 +219,12 @@ public class CustomWebSearch implements ServiceInterface {
 		//.replaceAll(websiteList[websiteNum_][2]," ");//Skip website code
 
 		String clickableURL_ = (websiteToSeachThrough.substring(3).replaceAll("#@","?"))+websiteList[websiteNum_][3];//TODO: Change to include end format to website_//.replace('V','?');
+		String searchingOnFormatted_ = websiteList[websiteNum_][1];
+	//  https://www.wikihow.com/
+		searchingOnFormatted_ = searchingOnFormatted_.substring(searchingOnFormatted_.indexOf("//")+2);
+		if(searchingOnFormatted_.indexOf("/") != -1){
+			searchingOnFormatted_ = searchingOnFormatted_.substring(0,searchingOnFormatted_.indexOf("/"));
+		}
 
 		boolean normalRun = true;
 		if(normalRun){
@@ -211,7 +232,7 @@ public class CustomWebSearch implements ServiceInterface {
 			JSONObject linkCard = card.addElement(
 					ElementType.link,
 					JSON.make("title", "CustomWebSeach",
-					 "desc","Searching for \""+searchingFor_+"\" on "+searchingOn_+""/*"</u><!--<br><--                          "+*/),//tmpStr_
+					 "desc","Searching for \""+searchingFor_+"\" on "+searchingOnFormatted_+""/*"</u><!--<br><--                          "+*/),//tmpStr_
 					null, null, "", 
 					clickableURL_,//URL of website with search
 					"https://sepia-framework.github.io/img/icon.png", 
