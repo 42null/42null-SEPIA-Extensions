@@ -46,13 +46,10 @@ import net.b07z.sepia.server.core.tools.JSON;
  * @commitType: Pre-Alpha
  * 
  * @versionName: 
- * @version #0.00.02.1
+ * @version #0.1.02.2
  *           |Version major submitted to the official SEPIA repository
- *             |Patches / other commits submitted to the offical
- *                |Current Version
- *                   |Nightly number - may excede its space and may be repeated
- * 
- * Testing here...
+ *             |.||Current Version including & Patches / other commits submitted to the offical
+ *                  |Nightly number - may excede its space and may be repeated
  * 
  * @TakeNote: Make shure to check your settings under #AREA. For more info run "Search help"
  */
