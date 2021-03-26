@@ -46,18 +46,22 @@ import net.b07z.sepia.server.core.tools.JSON;
  * @commitID: 
  * 
  * @versionName: 
- * @version #0.00.01.0 //First '1' is for the version submitted for a pull request onto the official SEPIA. Future versions will go up in order but if not submited will contain a '0' instead.
+ * @version #0.00.02.1
+ *           |Version major submitted to the official SEPIA repository
+ *             |Patches / other commits submitted to the offical
+ *                |Current Version
+ *                   |Nightly number - may excede its space or may be repeated, most likley will not be submitted to github unless requested.
  * 
  * Testing here...
  * 
- * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "CustomWebSearch help"
+ * @TakeNote: Make shure to check your settings under #AREA and read #PEREMENT. For more info run "Search help"
  */
 
 public class CustomWebSearch implements ServiceInterface {
 	
 	private static final String CMD_NAME = "custom_web_search";
-	private static final String versionName = "PullRequest1aCleaned";
-	private static final String versionNumber = "1.02.09.1";
+	private static final String versionName = "firstNewDeploymentOfNighlyBuildWithNewStart";
+	private static final String versionNumber = "0.00.02.1";
 	
 	// -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
 	private static final boolean makePublic = true; //This controls if this extension should be avaiable for all users.
@@ -78,16 +82,11 @@ public class CustomWebSearch implements ServiceInterface {
 	};
 	// -----------------------------------------------------------------------
 
-/* Currently (and maby never will) does not support
-	- Recursive search operators; searching for the space replacements name as part of the paramater, no real reason to do this in the first place though.
-	-
-*/
-
-
 	//Define some sentences for testing:
 	@Override
 	public TreeSet<String> getSampleSentences(String lang) {
 		TreeSet<String> samples = new TreeSet<>();
+			samples.add("Search help");
 			samples.add("Search Wikihow for pineapple");
 		return samples;
 	}
@@ -150,7 +149,7 @@ public class CustomWebSearch implements ServiceInterface {
 		
 		//Direct-match trigger sentences in different languages:
 		String EN = Language.EN.toValue();
-		info.setCustomTriggerRegX("search",EN);
+		// info.setCustomTriggerRegX("search",EN);
 		info.setCustomTriggerRegX("\\b("+"search"+")\\b",EN);
 
 
@@ -201,48 +200,61 @@ public class CustomWebSearch implements ServiceInterface {
 
 
 
-		// if(websiteToSeachThrough){}
-		int websiteNum_ = Integer.parseInt(websiteToSeachThrough.substring(0,3));
-		/*Change to www.____.com*/String searchingOn_ = websiteList[websiteNum_][1];
-		// searchingOn_ = searchingOn_.replaceFirst("https://+","").replaceFirst("http://+","");
-		// searchingOn_ = searchingOn_.substring(0, searchingOn_.indexOf("/+"));
-		// searchingOn_ = searchingOn_.substring(0,1).toUpperCase()+websiteList[websiteNum_][0].substring(1);
-		String searchingFor_ = websiteToSeachThrough.substring(3).replaceAll("/+","");
-		/*Change to www.____.com*/ searchingOn_ = websiteList[websiteNum_][0].substring(0,1).toUpperCase()+websiteList[websiteNum_][0].substring(1);
+		if(Character.isDigit(websiteToSeachThrough.charAt(0))){
+			int websiteNum_ = Integer.parseInt(websiteToSeachThrough.substring(0,3));
+			/*Change to www.____.com*/String searchingOn_ = websiteList[websiteNum_][1];
+			// searchingOn_ = searchingOn_.replaceFirst("https://+","").replaceFirst("http://+","");
+			// searchingOn_ = searchingOn_.substring(0, searchingOn_.indexOf("/+"));
+			// searchingOn_ = searchingOn_.substring(0,1).toUpperCase()+websiteList[websiteNum_][0].substring(1);
+			String searchingFor_ = websiteToSeachThrough.substring(3).replaceAll("/+","");
+			/*Change to www.____.com*/ searchingOn_ = websiteList[websiteNum_][0].substring(0,1).toUpperCase()+websiteList[websiteNum_][0].substring(1);
+			
+			// searchingFor_ = searchingFor_.replaceAll((websiteList[websiteNum_][1].replaceAll("/+","")),"");
+			
+			searchingFor_ = (searchingFor_.replaceAll(websiteList[websiteNum_][1].replaceAll("/+",""),"")).replaceAll("\\"+websiteList[websiteNum_][2]," ");
+			// searchingFor_ = searchingFor_.substring(1);
+			
+			// String searchingFor_ = "https://www.wikihow.com/wikiHowTo?search=test".replaceAll("https://www","!!!!!");
+			//.replaceAll(websiteList[websiteNum_][2]," ");//Skip website code
 
+			String clickableURL_ = (websiteToSeachThrough.substring(3).replaceAll("#@","?"))+websiteList[websiteNum_][3];//TODO: Change to include end format to website_//.replace('V','?');
+			String searchingOnFormatted_ = websiteList[websiteNum_][1];
+		//  https://www.wikihow.com/
+			searchingOnFormatted_ = searchingOnFormatted_.substring(searchingOnFormatted_.indexOf("//")+2);
+			if(searchingOnFormatted_.indexOf("/") != -1){
+				searchingOnFormatted_ = searchingOnFormatted_.substring(0,searchingOnFormatted_.indexOf("/"));
+			}
 
-		
-		// searchingFor_ = searchingFor_.replaceAll((websiteList[websiteNum_][1].replaceAll("/+","")),"");
-		
-		searchingFor_ = (searchingFor_.replaceAll(websiteList[websiteNum_][1].replaceAll("/+",""),"")).replaceAll("\\"+websiteList[websiteNum_][2]," ");
-		// searchingFor_ = searchingFor_.substring(1);
-		
-		// String searchingFor_ = "https://www.wikihow.com/wikiHowTo?search=test".replaceAll("https://www","!!!!!");
-		//.replaceAll(websiteList[websiteNum_][2]," ");//Skip website code
-
-		String clickableURL_ = (websiteToSeachThrough.substring(3).replaceAll("#@","?"))+websiteList[websiteNum_][3];//TODO: Change to include end format to website_//.replace('V','?');
-		String searchingOnFormatted_ = websiteList[websiteNum_][1];
-	//  https://www.wikihow.com/
-		searchingOnFormatted_ = searchingOnFormatted_.substring(searchingOnFormatted_.indexOf("//")+2);
-		if(searchingOnFormatted_.indexOf("/") != -1){
-			searchingOnFormatted_ = searchingOnFormatted_.substring(0,searchingOnFormatted_.indexOf("/"));
-		}
-
-		boolean normalRun = true;
-		if(normalRun){
+			boolean normalRun = true;
+			if(normalRun){
+				Card card = new Card(Card.TYPE_SINGLE);
+				JSONObject linkCard = card.addElement(
+						ElementType.link,
+						JSON.make("title", "CustomWebSeach",
+							"desc","Searching for \""+searchingFor_+"\" on "+searchingOnFormatted_+""/*"</u><!--<br><--                          "+*/),//tmpStr_
+						null, null, "", 
+						clickableURL_,//URL of website with search
+						"https://sepia-framework.github.io/img/icon.png", 
+						null, null
+				);
+				JSON.put(linkCard, "imageBackground", "#000");
+				api.addCard(card.getJSON());
+			}
+		}else if(websiteToSeachThrough.charAt(0)=='H' || websiteToSeachThrough.charAt(0)=='E'){//If it starts with the code of 'H' or an error
 			Card card = new Card(Card.TYPE_SINGLE);
-			JSONObject linkCard = card.addElement(
-					ElementType.link,
-					JSON.make("title", "CustomWebSeach",
-					 "desc","Searching for \""+searchingFor_+"\" on "+searchingOnFormatted_+""/*"</u><!--<br><--                          "+*/),//tmpStr_
-					null, null, "", 
-					clickableURL_,//URL of website with search
-					"https://sepia-framework.github.io/img/icon.png", 
-					null, null
-			);
-			JSON.put(linkCard, "imageBackground", "#000");
-			api.addCard(card.getJSON());
+				JSONObject linkCard = card.addElement(
+						ElementType.link,
+						JSON.make("title", "CustomWebSeach help page",
+							"desc",websiteToSeachThrough.substring(2)),
+						null, null, "", 
+						"https://github.com/42null/42null-SEPIA-Extensions",//URL of head website
+						"https://sepia-framework.github.io/img/icon.png", 
+						null, null
+				);
+				JSON.put(linkCard, "imageBackground", "#000");
+				api.addCard(card.getJSON());
 		}
+
 
 		//all good
 		api.setStatusSuccess();
@@ -275,35 +287,41 @@ public class CustomWebSearch implements ServiceInterface {
 			//search wikihow pineapple
 			//wikihow pineapple
 
-			for(int i = 0; i < websiteList.length; i++){
-				if(input_.indexOf(websiteList[i][0])==0){//(websiteList[1][0].length())){//This checks structure
-					website_ = i;
-					i = websiteList[0].length;//Exit
+			if(input_.equals("help")){//Check for special page requests 
+				return "H Ok, here a link to the help page";//TODO: Make a help page & add more lines of responce here.
+			}else if(Character.isDigit(input_.charAt(0))){
+				for(int i = 0; i < websiteList.length; i++){
+					if(input_.indexOf(websiteList[i][0])==0){//(websiteList[1][0].length())){//This checks structure
+						website_ = i;
+						i = websiteList[0].length;//Exit
+					}
 				}
+				if(website_ == -1){
+					website_ = 0;
+				}
+				input_ = input_.substring(websiteList[website_][0].length()+0);//Remove space after
+				if(input_.charAt(0)==' '){input_ = input_.substring(1);}
+				if(input_.charAt(0)==' '){input_ = input_.substring(1);}
+				if(input_.indexOf("for")==0){input_ = input_.substring(3);input_+=""/*"-"*/;}//removes search search ___ "for "
+				// input now is what we want to search
+				if(input_.charAt(0)==' '){input_ = input_.substring(1);}
+				if(input_.charAt(0)==' '){input_ = input_.substring(1);}
+
+				input_ = input_.replaceAll(" ",websiteList[website_][2]);//Replace spaces for replacement
+				input_ = websiteList[website_][1] + input_;
+
+				// First 2 spaces = website number, everything after = search until /void after this ¬, everything after that is full website search
+				String tmpStr_ = "00"+website_;
+				tmpStr_ = tmpStr_.substring(tmpStr_.length()-3);
+
+				return tmpStr_ + input_;
+				//Other languages
+				// }else{
+				// 	Debugger.println("Custom parameter 'websiteToSeachThrough' does not support language: " + this.language, 1);
+				// }
+			}else{//Unable to find a website or a custom page
+				return "E Sorry but I was unable to find anything under your request. For help, try entering \"Search help\"";
 			}
-			if(website_ == -1){
-				website_ = 0;
-			}
-			input_ = input_.substring(websiteList[website_][0].length()+0);//Remove space after
-			if(input_.charAt(0)==' '){input_ = input_.substring(1);}
-			if(input_.charAt(0)==' '){input_ = input_.substring(1);}
-			if(input_.indexOf("for")==0){input_ = input_.substring(3);input_+=""/*"-"*/;}//removes search search ___ "for "
-			// input now is what we want to search
-			if(input_.charAt(0)==' '){input_ = input_.substring(1);}
-			if(input_.charAt(0)==' '){input_ = input_.substring(1);}
-
-			input_ = input_.replaceAll(" ",websiteList[website_][2]);//Replace spaces for replacement
-			input_ = websiteList[website_][1] + input_;
-
-			// First 2 spaces = website number, everything after = search until /void after this ¬, everything after that is full website search
-			String tmpStr_ = "00"+website_;
-			tmpStr_ = tmpStr_.substring(tmpStr_.length()-3);
-
-			return tmpStr_ + input_;
-			//Other languages
-			// }else{
-			// 	Debugger.println("Custom parameter 'websiteToSeachThrough' does not support language: " + this.language, 1);
-			// }
 		}
 
 		@Override
