@@ -34,14 +34,21 @@ import net.b07z.sepia.server.assist.data.Card;
 import net.b07z.sepia.server.assist.data.Card.ElementType;
 import net.b07z.sepia.server.core.assistant.ACTIONS;
 import net.b07z.sepia.server.core.tools.JSON;
+//Imports for grabing a favicon
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * CustomWebSearch SDK extension for the SEPIA Framework
  * @author Florian Quirin (RestrauntDemo - this file's template)
- * @author 42null		  (CustomWebSearch - this file), also, anything special about this line number? :)
+ * @author 42null		  (CustomWebSearch - this file)
  * 
  * @moreInfo: SEPIA Framework Website: https://github.com/SEPIA-Framework/
- * @moreInfo: My Personal Repository : https://github.com/42null/42null-SEPIA-Extensions/
+ * @moreInfo: 42null Personal Repository : https://github.com/42null/42null-SEPIA-Extensions/
  * @dateInstalled: 
  * @commitType: Pre-Alpha
  * 
@@ -57,58 +64,75 @@ import net.b07z.sepia.server.core.tools.JSON;
 public class CustomWebSearch implements ServiceInterface {
 	
 	private static final String CMD_NAME = "custom_web_search";
-	private static final String versionName = "firstNewDeploymentOfNighlyBuildWithNewStart";
-	private static final String versionNumber = "0.00.02.1";
+	private static final String versionName = "Nightly2.1+";
+	private static final String versionNumber = "0.00.02.2";
 	private static final String commitType = "Pre-Alpha";
 	
 	// -------------------- #AREA FOR SETTING'S VARAIBLES --------------------
-	private static final boolean makePublic = true; //This controls if this extension should be avaiable for all users.
-	private static final boolean expermentalMode = false; //Allows you to use some expermental features not qwite implementd or that currently have bugs.
-	private static final boolean doDisclaimers = true; //If set to false, disclaimers will not be reported.
-	private static final boolean debugMode = false; //Enables extra outputs
-	//<website operator>, <starturl>, <spaces>
-	private static final String[][] websiteList = {//To work with '?' marks you will need to replace them wilth a #@, if you would like to change this, search and replace this string with something else
-	// Default working examples:
-	// {"!!!","negitive array posistion found","!"},
+	private static final boolean makePublic = true; //Controls if this extension should be avaiable for all users.
+	private static final boolean debugMode = false; //Enables extra or diffrent outputs used for debugging
 
-	//{ <Trigger word > , <url format before ending> , <space replacement operator>, <url ending format>}
+	private static final boolean grabbingFavicon = true; //If you would like to enable viewing favicons next to your resaults response then set this flag to true.
+
+	//To work with '?' marks you will need to replace them wilth a #@ //TODO: Make changeable
+	private static final String[][] websiteList = {
+/*  Default example of a list with working examples:
+
+	Structure
+	{ <Trigger word > , <url format before ending> , <space replacement operator>, <url ending format>}
+*/
 	{"youtube,","https://www.youtube.com/results#@search_query=","+", ""},//Defaut to search when not found
 	{"wikihow","https://www.wikihow.com/wikiHowTo#@search=","+",""},
-	{"wikipedia","https://www.en.wikipedia.org/wiki/","_",""},
-	{"duck","https://www.duckduckgo.com/#@q=","+","&ia=web"},//Need to do search for "?"
-	{"_","_","_","_"}
+	{"wikipedia","https://en.wikipedia.org/wiki/","_",""},
+	{"duck","https://www.duckduckgo.com/#@q=","+","&ia=web"},
+	{"the duck","https://www.duckduckgo.com/#@q=","+","&ia=web"},//Need to do search for "?"
+	{"github","https://www.github.com/search#@q=","+",""},
+	{"gitsep","https://www.github.com/search#@q=org%3ASEPIA-Framework","+","&type=commits"},
+	{"pick","https://www.picknsave.com/search#@query=","%20","&searchType=default_search&fulfillment=all"}
 	};
-	// -----------------------------------------------------------------------
 
+	// --------------------- END OF SETTING'S VARAIBLES ----------------------
+
+	/**
+	 * 
+	 * @param lang
+	 * @return
+	 */
 	//Define some sentences for testing:
 	@Override
 	public TreeSet<String> getSampleSentences(String lang) {
 		TreeSet<String> samples = new TreeSet<>();
-			samples.add("Search help");
-			samples.add("Search Wikihow for pineapple");
+		samples.add("Search help");
+		samples.add("Search version");
+		samples.add("Search Wikihow for pineapple");
 		return samples;
 	}
-	
+
+	/**
+	 * 
+	 * @param language
+	 * @return
+	 */
 	@Override
 	public ServiceAnswers getAnswersPool(String language) {
 		ServiceAnswers answerPool = new ServiceAnswers(language);
 		
-		//Build English answers
-		// if (language.equals(LANGUAGES.EN)){
-		if(debugMode){
-			answerPool.addAnswer(successAnswer, 0, "CustomWebSearch Returning: '<1>'");
-		}else{
-			// answerPool.addAnswer(successAnswer, 0, "<1>");//TODO: Change to allow .substring(), want to be able to just state a link
-			String possableStatements[] = {
-			"Here you go!",
-			"Try clicking this! :D",
-			"I believe this is what you are looking for...",
-			"v V v V v V  (See Below)  V v V v V v",
-			"I don't have the answer, but this should help! :)"
-			};
-			String finishStatement_ = possableStatements[(int)(Math.random()*((possableStatements.length)))];
-			answerPool.addAnswer(successAnswer, 0, finishStatement_);//TODO: Change to allow .substring(), want to be able to just state a link
-		}
+		// Build English answers
+		if(language.equals(LANGUAGES.EN)){
+			if(debugMode){
+				answerPool.addAnswer(successAnswer, 0, "CustomWebSearch Returning: '<1>'");
+			}else{
+				// answerPool.addAnswer(successAnswer, 0, "<1>");//TODO: Change to allow .substring(), want to be able to just state a link
+				String possableStatements[] = {
+				"Here you go!",
+				"Try clicking this! :D",
+				"I believe this is what you are looking for...",
+				"v V v V v V  (See Below)  V v V v V v",
+				"I don't have the answer, but this should help! :)"
+				};
+				String finishStatement_ = possableStatements[(int)(Math.random()*((possableStatements.length)))];
+				answerPool.addAnswer(successAnswer, 0, finishStatement_);//TODO: Change to allow .substring(), want to be able to just state a link
+			}
 			//TODO: Use this feature
 			answerPool			
 				.addAnswer(okAnswer, 0, "Sorry there has been an error @okAnswer")
@@ -118,14 +142,32 @@ public class CustomWebSearch implements ServiceInterface {
 				Answer.Character.neutral, 2, 5))
 				;
 			return answerPool;
-		
+
+
+		}else{//If not english
+			answerPool.addAnswer(successAnswer, 0, "CustomWebSearch Returning: '<1>'");
+			//TODO: Use this feature
+			answerPool			
+				.addAnswer(okAnswer, 0, "Sorry language not supported")
+						// Answer.Character.neutral, 2, 5))
+				.addAnswer(new Answer(Language.from(language), askwebsiteToSeachThrough, "Sorry language not supported", 
+				Answer.Character.neutral, 2, 5))
+				;
+			return answerPool;
+		}
 	}
+
 	private static final String failAnswer = "error_0a";
 	private static final String successAnswer = ServiceAnswers.ANS_PREFIX + "CustomWebSearch_success";
 	private static final String okAnswer = ServiceAnswers.ANS_PREFIX + "CustomWebSearch_ok";
 
 	private static final String askwebsiteToSeachThrough = ServiceAnswers.ANS_PREFIX + "simpleMath_ask_first_question";
 
+	/**
+	 * 
+	 * @param language
+	 * @return
+	 */
 	@Override
 	public ServiceInfo getInfo(String language) {
 		//Type of service (for descriptions, choose what you think fits best)
@@ -168,6 +210,11 @@ public class CustomWebSearch implements ServiceInterface {
 		return info;
 	}
 	
+	/**
+	 * 
+	 * @param nluResult
+	 * @return
+	 */
 	@Override
 	public ServiceResult getResult(NluResult nluResult) {
 		//initialize result
@@ -190,11 +237,11 @@ public class CustomWebSearch implements ServiceInterface {
 		// /*boolean wasSent =*/ service.sendFollowUpMessage(nluResult.input, service.buildResult());
 		//Just for demo purposes we add a button-action with a link to the SDK
 
-
 		String finalTitle = "";
 		String finalDescription = "";
 		String finalURL = "";
 		String finalIcon = "https://sepia-framework.github.io/img/icon.png";//Default
+		String finalColor = "#000";//Deafult 	//more options like CSS background
 
 		if(Character.isDigit(websiteToSeachThrough.charAt(0))){
 			int websiteNum_ = Integer.parseInt(websiteToSeachThrough.substring(0,3));
@@ -213,6 +260,42 @@ public class CustomWebSearch implements ServiceInterface {
 
 			finalTitle = "CustomWebSeach";
 			finalDescription = "Searching for \""+searchingFor_+"\" on "+searchingOnFormatted_;
+			//Grabbing the favicon
+			if(grabbingFavicon){
+				try{
+					URL url = new URL(finalURL);
+					URLConnection urlConnection = url.openConnection();
+					InputStream inputStream = urlConnection.getInputStream();
+					BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			
+					String line = null;
+			
+					while ((line = bufferedReader.readLine()) != null && !line.contains(".ico")) {
+					}
+					line = line.substring(0, line.indexOf(".ico")+4);
+					line = line.substring(line.lastIndexOf("href=\"")+6);
+					finalIcon = line;
+					finalColor = "#999";
+				}catch(Exception e){
+					try{
+						URL url = new URL(finalURL);
+						URLConnection urlConnection = url.openConnection();
+						InputStream inputStream = urlConnection.getInputStream();
+						BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+				
+						String line = null;
+				
+						while ((line = bufferedReader.readLine()) != null && !line.contains(".ico")) {
+						}
+						line = line.substring(0, line.indexOf(".ico")+4);
+						line = line.substring(line.lastIndexOf("href=\"")+6);
+						finalIcon = searchingOn_ = websiteList[websiteNum_][0]+line;
+						finalColor = "#999";
+					}catch(Exception f){
+
+					}
+				}
+			}
 
 		}else if(websiteToSeachThrough.charAt(0)=='H' || websiteToSeachThrough.charAt(0)=='E'){//If it starts with the code of 'H' or an error
 			finalTitle = "CustomWebSeach Help Page";
@@ -241,7 +324,7 @@ public class CustomWebSearch implements ServiceInterface {
 					finalIcon, 
 					null, null
 			);
-		JSON.put(linkCard1, "imageBackground", "#000"/*999*/);	//more options like CSS background
+		JSON.put(linkCard1, "imageBackground", finalColor);
 		api.addCard(card1.getJSON());
 
 		//all good
@@ -253,9 +336,16 @@ public class CustomWebSearch implements ServiceInterface {
 	}
 	
 	//----------------- custom parameters -------------------
-	
+	/**
+	 * 
+	 */
 	public static class GetWebsiteParameter extends CustomParameter {
 
+		/**
+		 * 
+		 * @param input_
+		 * @return
+		 */
 		private String formatStart(String input_){
 			while(input_.contains("  ")){input_ = input_.replaceAll("  "," ");}
 			input_ = input_.substring(7);//search.length (removes search & first space)
@@ -263,6 +353,11 @@ public class CustomWebSearch implements ServiceInterface {
 			return input_;
 		}
 
+		/**
+		 * 
+		 * @param input_
+		 * @return
+		 */
 		@Override
 		public String extract(String input_){
 			int website_ = -1;
@@ -278,20 +373,20 @@ public class CustomWebSearch implements ServiceInterface {
 			if(input_.equals("help")){//Check for special page requests 
 				return "H Ok, here a link to the help page";//TODO: Make a help page & add more lines of responce here.
 			}else if(input_.equals("version")){
-				return "V Version Name: <u>"+"versionName"+"</u><br> versionID: <u>"+"versionNumber"+"</u><br> Github CommitType: <u>commitType</u>";//Set to status?
+				return "V Version Name: <u>"+"versionName"+"</u><br> versionID: <u>"+"versionNumber"+"</u><br> Github Commit Type: <u>commitType</u>";//Set to status?
 				
 			}else{// if(Character.isDigit(input_.charAt(0))){
 				try{
 					for(int i = 0; i < websiteList.length; i++){
 						if(input_.indexOf(websiteList[i][0])==0){//(websiteList[1][0].length())){//This checks structure
 							website_ = i;
-							i = websiteList[0].length;//Exit
+							i = websiteList.length;//Exit
 						}
 					}
 					if(website_ == -1){
 						website_ = 0;
 					}
-					input_ = input_.substring(websiteList[website_][0].length()+0);//Remove space after
+					input_ = input_.substring(websiteList[website_][0].length());//Remove space after
 					if(input_.charAt(0)==' '){input_ = input_.substring(1);}
 					if(input_.charAt(0)==' '){input_ = input_.substring(1);}
 					if(input_.indexOf("for")==0){input_ = input_.substring(3);input_+=""/*"-"*/;}//removes search search ___ "for "
@@ -312,11 +407,16 @@ public class CustomWebSearch implements ServiceInterface {
 					// 	Debugger.println("Custom parameter 'websiteToSeachThrough' does not support language: " + this.language, 1);
 					// }
 				}catch(Exception e){//Unable to find the website or custom name.
-					return "E Sorry but I was unable to find anything under your request. For help, try entering \"Search help\"";
+					return "E Sorry but I was unable to find anything under your request. For help, try entering \"Search help\".";
 				}
 			}
 		}
 
+		/**
+		 * 
+		 * @param input
+		 * @return
+		 */
 		@Override
 		public String responseTweaker(String input){
 			if (language.equals(LANGUAGES.EN)){
@@ -327,6 +427,11 @@ public class CustomWebSearch implements ServiceInterface {
 			}
 		}
 
+		/**
+		 * 
+		 * @param input
+		 * @return
+		 */
 		@Override
 		public String build(String input){
 			//anything extracted?
