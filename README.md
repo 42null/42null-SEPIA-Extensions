@@ -2,11 +2,12 @@
 This is my repository for the SEPIA extensions that I have written. I am so glad to have found a Java based local processing voice assistant I would love to contrubute in the only way I know how.
 
 <p><b>--Pre-Alpha Extensions--</b></p>
-    <p2><b>Custom Web Search:</b> A simple search extension that generates a link to the search resaults of the webpage you would like to search.</p2>
+    <p2><b>Custom Web Search*:</b> A simple search extension that generates a link to the search resaults of the webpage you would like to search.</p2>
        <ul>
             <li>After configuration, simpay type or say "Search &lttrigger word&gt for &ltphrase to search&gt" and a link will be provided for you connecting you to the search resaults of your request.</li>
            <li>You can include "for" in your search operation, however, it will be ignored if it is the first search word used.</li>
        </ul>
+    <p><i>* I realise that I should be making this in a manner that makes post requests instead of the present system. I am still deciding if I should change the project to accodomate this or if I should gain more experence first.</i></p>
 <p><b>--Paused Extensions--</b>
 
 <p2><b>Basic Math:</b> A basic math extension that works offline without insted of attempting to conduct a web search.</p2>
